@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -49,7 +50,7 @@
   .mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
   .text-center { text-align: center; }
   
-  /* Buttons - Touch Friendly */
+  /* Buttons */
   .btn { 
     padding: 14px 20px; 
     border-radius: 14px; 
@@ -239,7 +240,7 @@
     overflow: hidden; 
   }
   .balance-card::after { content: '✨'; position: absolute; right: -10px; top: -10px; font-size: 100px; opacity: 0.1; }
-  .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: nowrap; line-height: 1.5; }
+  .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: normal; line-height: 1.5; max-width: 90%; }
 
   /* --- MOBILE RESPONSIVE OVERRIDES (รองรับ iPad & Mobile) --- */
   @media (max-width: 1024px) {
@@ -285,31 +286,19 @@
 </head>
 <body>
 
-<!-- Script จัดการปัญหากรณีเปิดไฟล์จากเครื่องโดยตรง (file://) -->
-<script>
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      var loader = document.getElementById('loading');
-      if (loader && loader.style.display !== 'none') {
-        loader.innerHTML = '<div style="background:white; padding:24px; border-radius:24px; color:#333; max-width:90%; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"><div style="font-size:50px; margin-bottom:10px;">⚠️</div><h3 style="color:#e74c3c; margin-bottom:10px; font-family:\'Sarabun\', sans-serif;">หน้าจอไม่แสดงผล?</h3><p style="font-size:15px; color:#666; font-family:\'Sarabun\', sans-serif;">ระบบตรวจพบการบล็อกสคริปต์ หากคุณดับเบิลคลิกเปิดไฟล์นี้จากเครื่องโดยตรง เบราว์เซอร์จะไม่อนุญาตให้ทำงานครับ<br><br><b style="color:var(--black);">วิธีแก้:</b> ให้อัปโหลดไฟล์นี้ขึ้นระบบเซิร์ฟเวอร์ (เช่น GitHub Pages) แล้วเข้าใช้งานผ่านลิงก์เว็บแทนครับ</p></div>';
-      }
-    }, 4000);
-  });
-</script>
-
 <!-- Toast Notification -->
 <div id="toast" class="toast"></div>
 
 <!-- Loading Overlay -->
 <div id="loading" class="modal-overlay" style="z-index: 9999; flex-direction: column; display: flex;">
   <div style="font-size: 48px; animation: spin 1s linear infinite;">⏳</div>
-  <div style="color: white; margin-top: 16px; font-weight: 600; letter-spacing: 1px;">กำลังเชื่อมต่อระบบ...</div>
+  <div style="color: white; margin-top: 16px; font-weight: 600; letter-spacing: 1px;" id="loading-text">กำลังตรวจสอบข้อมูล...</div>
 </div>
 
 <!-- PAGE: LOGIN / REGISTER -->
 <div id="page-login" class="hidden">
   <div class="login-box">
-    <!-- ปรับโลโก้ให้เปลี่ยนตามหน้าร้าน -->
+    <!-- โลโก้หน้าร้าน (ล็อกอิน) -->
     <div class="login-logo" id="login-logo-container">
       <img id="login-logo-img" src="" alt="โลโก้ร้าน" style="display:none; width: 100%; height: 100%; object-fit: cover;">
       <span id="login-logo-fallback">✨</span>
@@ -443,14 +432,14 @@
         <input type="text" id="wit-remark" class="form-control" placeholder="เช่น ต้องการทองแท่ง / มารับหน้าร้าน">
       </div>
       
-      <!-- แยกส่วนติดต่อร้านตามที่ขอ -->
+      <!-- แยกส่วนติดต่อร้าน -->
       <div class="form-group" style="background: #FEF3C7; padding: 20px; border-radius: 16px; margin-top: 24px; text-align:center;">
         <label style="color: #92400E; font-size: 14px; margin-bottom: 12px; display:block;">📞 ติดต่อร้านทองเพื่อยืนยันการถอน</label>
         <div id="cust-shop-contact-details" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.8; margin-bottom: 12px;">
           <!-- ข้อมูลเบอร์ และ ID จะถูกแทรกที่นี่ -->
         </div>
         <div id="cust-shop-contact-btn">
-          <!-- ปุ่มลิงก์จะถูกแทรกที่นี่ -->
+          <!-- ปุ่มลิงก์เพิ่มเพื่อนจะถูกแทรกที่นี่ -->
         </div>
       </div>
       
@@ -606,7 +595,6 @@
         <div class="form-group"><label>ชื่อร้าน</label><input type="text" id="set-shopname" class="form-control"></div>
         <div class="form-group"><label>เบอร์โทรติดต่อ</label><input type="text" id="set-phone" class="form-control"></div>
         
-        <!-- แยกไอดีและลิงก์ไลน์ ตามที่รีเควส -->
         <div class="form-group"><label>Line ID (ไอดีไลน์)</label><input type="text" id="set-line-id" class="form-control" placeholder="เช่น @goldshop"></div>
         <div class="form-group"><label>ลิงก์เพิ่มเพื่อน Line (URL)</label><input type="text" id="set-line-link" class="form-control" placeholder="เช่น https://line.me/ti/p/..."></div>
         
@@ -713,14 +701,15 @@
   const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
   const getDocRef = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
+  // Safeguard null arrays
   window.appState = {
     currentUser: null,
-    users: safeParseJSON(localStorage.getItem('cache_users'), []),
-    transactions: safeParseJSON(localStorage.getItem('cache_txs'), []),
-    settings: safeParseJSON(localStorage.getItem('cache_settings'), {
+    users: safeParseJSON(localStorage.getItem('cache_users'), []) || [],
+    transactions: safeParseJSON(localStorage.getItem('cache_txs'), []) || [],
+    settings: safeParseJSON(localStorage.getItem('cache_settings'), null) || {
       shopName: 'ร้านทองพรีเมียม', phone: '', lineId: '', lineLink: '', bankName: '', bankAccName: '', bankAccNo: '', qrBase64: '', shopLogoBase64: '', 
       tgToken: '8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw', tgChatId: '-1003963635991', hasSuperAdmin: false
-    }),
+    },
   };
 
   let pendingTxId = null;
@@ -732,12 +721,17 @@
     t.textContent = msg;
     t.style.background = isError ? "var(--red)" : "var(--black)";
     t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 4000);
+    setTimeout(() => { t.style.display = 'none'; }, 5000);
   };
   
   window.showLoading = (show) => {
     const el = getEl('loading');
-    if(el) el.style.display = show ? 'flex' : 'none';
+    if(el) {
+       el.style.display = show ? 'flex' : 'none';
+       // Reset loading text
+       const txt = getEl('loading-text');
+       if(txt) txt.textContent = "กำลังเชื่อมต่อระบบ...";
+    }
   };
   
   window.closeModal = (id) => {
@@ -779,16 +773,6 @@
     }
   };
 
-  const ensureAuth = async () => {
-    if (auth.currentUser) return true;
-    return new Promise(resolve => {
-      const unsub = onAuthStateChanged(auth, user => {
-        if (user) { unsub(); resolve(true); }
-      });
-      setTimeout(() => { unsub(); resolve(!!auth.currentUser); }, 5000);
-    });
-  };
-
   const initApp = async () => {
     try {
       const savedUserStr = localStorage.getItem('goldAppUser');
@@ -814,8 +798,11 @@
         await signInAnonymously(auth);
       }
     } catch (e) {
-      console.warn("Offline Mode");
-      showToast("คำเตือน: ไม่สามารถเชื่อมต่อฐานข้อมูลได้ (โปรดเช็ค Firebase Auth)", true);
+      console.error("Auth Error:", e);
+      let errMsg = "ไม่ได้เปิด Anonymous Auth";
+      if(e.code === 'auth/unauthorized-domain') errMsg = "โดเมนไม่ได้รับอนุญาตใน Firebase";
+      if(e.code === 'auth/operation-not-allowed') errMsg = "กรุณาเปิด Anonymous ใน Firebase";
+      showToast("⚠️ คำเตือน: " + errMsg, true);
     }
 
     setInterval(() => checkAndRunBackup(), 3600000);
@@ -830,11 +817,14 @@
         try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
         updateSettingsUI();
       }
-    }, (err) => console.error("Settings Sync Error:", err));
+    }, (err) => {
+        console.error(err);
+        showToast("⚠️ Firebase Error: ไม่สามารถอ่านการตั้งค่า (ตรวจสอบ Rules)", true);
+    });
 
     onSnapshot(getCol('appUsers'), (snap) => {
-      // ระบบ Self-Healing ฟื้นฟูข้อมูลจาก Local ขึ้น Cloud ป้องกันลูกค้าหาย
       if(snap.empty && window.appState.users && window.appState.users.length > 0) {
+         // Self healing - push local users up if server is empty but we have local cache
          window.appState.users.forEach(async (u) => {
             try { await setDoc(getDocRef('appUsers', u.id), u); } catch(e) {}
          });
@@ -886,11 +876,11 @@
     
     if(tab === 'register') {
       const secGroup = getEl('secret-code-group');
-      if(secGroup) secGroup.classList.toggle('hidden', window.appState.settings.hasSuperAdmin);
+      const s = window.appState.settings || {};
+      if(secGroup) secGroup.classList.toggle('hidden', s.hasSuperAdmin);
     }
   };
 
-  // Switch to Customer View
   window.switchToCustomerView = () => {
     hideEl('page-admin');
     showEl('page-customer');
@@ -898,7 +888,6 @@
     navCust('home');
   };
 
-  // Switch to Admin View
   window.switchToAdminView = () => {
     hideEl('page-customer');
     showEl('page-admin');
@@ -922,7 +911,6 @@
 
     if(role === 'superadmin' || role === 'subadmin') {
       showEl('page-admin');
-      
       const navSet = getEl('nav-settings');
       if(navSet) navSet.classList.toggle('hidden', role !== 'superadmin');
       
@@ -961,19 +949,17 @@
     if(isUsed) return showToast("เบอร์โทรนี้ถูกใช้งานแล้ว", true);
 
     showLoading(true);
-    let role = 'customer';
-    const isAuthed = await ensureAuth();
     
-    // Check Auth Before Saving
-    if(!isAuthed) {
-       showToast("ขาดการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง", true);
-       showLoading(false);
-       return;
+    if(!auth.currentUser) {
+       showToast("⚠️ กำลังทำงานในโหมดออฟไลน์ ข้อมูลจะไม่ขึ้นหน้าแอดมินจนกว่าเน็ตจะกลับมา", true);
     }
     
-    if(secret === '9999' && !window.appState.settings.hasSuperAdmin) {
+    let role = 'customer';
+    const s = window.appState.settings || {};
+    
+    if(secret === '9999' && !s.hasSuperAdmin) {
       role = 'superadmin';
-      window.appState.settings.hasSuperAdmin = true;
+      s.hasSuperAdmin = true;
       try { await setDoc(getDocRef('settings', 'global'), { hasSuperAdmin: true }, { merge: true }); } catch(e) {}
     } else if (secret === '9999') {
       showToast("รหัสลับถูกใช้ไปแล้ว ไม่สามารถเป็น Super Admin ได้อีก", true);
@@ -985,21 +971,24 @@
     const newUser = { id: docId, phone: phone, password: pass, name: name, role: role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
     try {
-      // บังคับเซฟลง Firebase ถ้าพังให้แจ้งเตือน
-      await setDoc(getDocRef('appUsers', docId), newUser);
+      if(auth.currentUser) {
+         await setDoc(getDocRef('appUsers', docId), newUser);
+      }
       
+      if(!window.appState.users) window.appState.users = [];
       window.appState.users.push(newUser);
+      
       try {
          localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
          localStorage.setItem('goldAppUser', JSON.stringify(newUser));
       } catch(e){}
-      window.appState.currentUser = newUser;
       
+      window.appState.currentUser = newUser;
       showToast("สมัครสมาชิกสำเร็จ!");
       routeUser();
     } catch (err) {
       console.error("Firebase Write Error:", err);
-      showToast("สมัครไม่สำเร็จ: ฐานข้อมูลไม่อนุญาต (โปรดตั้งค่า Firebase)", true);
+      showToast("❌ สมัครไม่สำเร็จ: ฐานข้อมูลล็อกอยู่ (โปรดไปเปิด Rules ใน Firebase)", true);
     } finally {
       showLoading(false);
     }
@@ -1062,8 +1051,7 @@
     const picInput = getEl('edit-profile-pic');
     
     showLoading(true);
-    const isAuthed = await ensureAuth();
-    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    if(!auth.currentUser) { showLoading(false); return showToast("ออฟไลน์: ไม่สามารถบันทึกขึ้นเซิร์ฟเวอร์", true); }
     
     let updateData = { name: name, email: email };
     if(picInput && picInput.dataset && picInput.dataset.base64) {
@@ -1080,7 +1068,7 @@
        updateProfileUI();
     } catch(e) {
        console.error(e);
-       showToast("บันทึกไม่สำเร็จ (ตรวจสอบสิทธิ์ Firebase)", true);
+       showToast("❌ บันทึกไม่สำเร็จ (ตรวจสอบสิทธิ์ Firebase)", true);
     }
     showLoading(false);
   };
@@ -1088,10 +1076,9 @@
   window.updatePassword = async () => {
     const pass = getVal('edit-pass');
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
-    showLoading(true);
     
-    const isAuthed = await ensureAuth();
-    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ออฟไลน์: ไม่สามารถเปลี่ยนรหัส", true); }
     
     window.appState.currentUser.password = pass;
     try {
@@ -1099,7 +1086,7 @@
        showToast("เปลี่ยนรหัสผ่านสำเร็จ");
        setVal('edit-pass', '');
     } catch(e) {
-       showToast("บันทึกไม่สำเร็จ", true);
+       showToast("❌ บันทึกไม่สำเร็จ", true);
     }
     showLoading(false);
   };
@@ -1125,8 +1112,7 @@
     if(!slipBase64) return showToast("กรุณาแนบสลิปโอนเงิน", true);
 
     showLoading(true);
-    const isAuthed = await ensureAuth();
-    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด ส่งข้อมูลไปแอดมินไม่ได้", true); }
 
     const tx = {
       id: genId(), 
@@ -1143,6 +1129,7 @@
     try {
       await setDoc(getDocRef('transactions', tx.id), tx);
       
+      if(!window.appState.transactions) window.appState.transactions = [];
       window.appState.transactions.unshift(tx);
       try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
       
@@ -1159,7 +1146,7 @@
       navCust('history');
     } catch(e) {
       console.error(e);
-      showToast("ส่งคำขอไม่สำเร็จ (ระบบเชื่อมต่อขัดข้อง)", true);
+      showToast("❌ ส่งคำขอไม่สำเร็จ (ระบบเชื่อมต่อขัดข้อง)", true);
     }
     showLoading(false);
   };
@@ -1174,8 +1161,7 @@
     if(amount > max) return showToast("ยอดเงินออมไม่เพียงพอ", true);
 
     showLoading(true);
-    const isAuthed = await ensureAuth();
-    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด", true); }
 
     const tx = {
       id: genId(), 
@@ -1191,6 +1177,7 @@
     try {
       await setDoc(getDocRef('transactions', tx.id), tx);
       
+      if(!window.appState.transactions) window.appState.transactions = [];
       window.appState.transactions.unshift(tx);
       try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
       
@@ -1204,7 +1191,7 @@
       navCust('history');
     } catch(e) {
       console.error(e);
-      showToast("ส่งคำขอไม่สำเร็จ (ระบบเชื่อมต่อขัดข้อง)", true);
+      showToast("❌ ส่งคำขอไม่สำเร็จ (ระบบเชื่อมต่อขัดข้อง)", true);
     }
     showLoading(false);
   };
@@ -1394,8 +1381,7 @@
   window.changeRole = async (uid, newRole) => {
     if(confirm(`ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้เป็น ${newRole} ใช่หรือไม่?`)) {
       showLoading(true);
-      const isAuthed = await ensureAuth();
-      if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+      if(!auth.currentUser) { showLoading(false); return showToast("ออฟไลน์ไม่สามารถแก้ไขสิทธิ์", true); }
       
       let targetUser = null;
       for(let i=0; i<window.appState.users.length; i++){
@@ -1410,7 +1396,7 @@
          showToast("เปลี่ยนสิทธิ์สำเร็จ");
       } catch(e) {
          console.error(e);
-         showToast("เปลี่ยนสิทธิ์ไม่สำเร็จ", true);
+         showToast("❌ เปลี่ยนสิทธิ์ไม่สำเร็จ", true);
       }
       showLoading(false);
     }
@@ -1458,8 +1444,7 @@
 
   const processTx = async (txId, status, overrideAmount = null, rejectReason = "") => {
     showLoading(true);
-    const isAuthed = await ensureAuth();
-    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ขาดการเชื่อมต่อ ไม่สามารถจัดการข้อมูล", true); }
     
     let tx = null;
     if(window.appState.transactions) {
@@ -1521,13 +1506,13 @@
       showToast("ดำเนินการสำเร็จ");
     } catch(e) {
       console.error(e);
-      showToast("ดำเนินการไม่สำเร็จ (ตรวจสอบสิทธิ์ Firebase)", true);
+      showToast("❌ ดำเนินการไม่สำเร็จ (ตรวจสอบสิทธิ์ Firebase)", true);
     }
     showLoading(false);
   };
 
   const updateSettingsUI = () => {
-    const s = window.appState.settings;
+    const s = window.appState.settings || {};
     
     const sName = s.shopName ? s.shopName : 'พรีเมียมออมทอง';
     setText('cust-header-name', sName);
@@ -1594,8 +1579,7 @@
 
   window.saveSettings = async () => {
     showLoading(true);
-    const isAuthed = await ensureAuth();
-    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์: ไม่สามารถบันทึกตั้งค่าได้", true); }
     
     const newData = {
       shopName: getVal('set-shopname'),
@@ -1605,7 +1589,7 @@
       bankName: getVal('set-bankname'),
       bankAccName: getVal('set-bankaccname'),
       bankAccNo: getVal('set-bankaccno'),
-      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw", 
+      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw", // FIXED
       tgChatId: getVal('set-tg-chatid')
     };
     
@@ -1615,7 +1599,7 @@
     const logoInput = getEl('set-shop-logo');
     if(logoInput && logoInput.dataset && logoInput.dataset.base64) newData.shopLogoBase64 = logoInput.dataset.base64;
 
-    window.appState.settings = {...window.appState.settings, ...newData};
+    window.appState.settings = {...(window.appState.settings||{}), ...newData};
     try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
     updateSettingsUI();
 
@@ -1624,13 +1608,13 @@
       showToast("บันทึกการตั้งค่าสำเร็จ");
     } catch(e) {
       console.error(e);
-      showToast("บันทึกไม่สำเร็จ (ตรวจสิทธิ์ Firebase)", true);
+      showToast("❌ บันทึกไม่สำเร็จ (ตรวจสิทธิ์ Firebase)", true);
     }
     showLoading(false);
   };
 
   const sendTgMsg = async (text) => {
-    const s = window.appState.settings;
+    const s = window.appState.settings || {};
     if(!s.tgToken || !s.tgChatId) return;
     try {
       await fetch(`https://api.telegram.org/bot${s.tgToken}/sendMessage`, {
