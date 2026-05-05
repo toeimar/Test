@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -90,6 +91,7 @@
     appearance: none;
   }
   .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-light); }
+  .form-control:disabled, .form-control[readonly] { background: var(--gray-light); color: var(--gray); cursor: not-allowed; }
   
   /* Cards */
   .card { 
@@ -186,6 +188,7 @@
     position: fixed; 
     height: 100vh; 
     z-index: 1001; 
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
   }
   .admin-content { flex: 1; margin-left: 280px; padding: 32px; max-width: 1200px; padding-bottom: 60px; }
   .admin-nav-item { 
@@ -245,10 +248,9 @@
     .mobile-only { display: flex !important; } 
 
     .admin-layout { flex-direction: column; }
-    .admin-sidebar { display: none !important; } /* ซ่อนแถบด้านซ้าย */
+    .admin-sidebar { display: none !important; } 
     .admin-content { margin-left: 0; padding: 16px; padding-bottom: 120px; max-width: 100%; }
     
-    /* Sticky Topbar สำหรับ Admin บนมือถือและแท็บเล็ต */
     .admin-topbar { 
       position: sticky; 
       top: 0; 
@@ -283,15 +285,26 @@
 </head>
 <body>
 
+<!-- Script จัดการปัญหากรณีเปิดไฟล์จากเครื่องโดยตรง (file://) จะไม่หน้าจอขาว แต่ขึ้นแจ้งเตือนให้แก้ปัญหา -->
+<script>
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      var loader = document.getElementById('loading');
+      if (loader && loader.style.display !== 'none') {
+        loader.innerHTML = '<div style="background:white; padding:24px; border-radius:24px; color:#333; max-width:90%; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"><div style="font-size:50px; margin-bottom:10px;">⚠️</div><h3 style="color:#e74c3c; margin-bottom:10px; font-family:\'Sarabun\', sans-serif;">หน้าจอไม่แสดงผล?</h3><p style="font-size:15px; color:#666; font-family:\'Sarabun\', sans-serif;">ระบบตรวจพบการบล็อกสคริปต์ความปลอดภัย หากคุณดับเบิลคลิกเปิดไฟล์นี้จากเครื่องโดยตรง (file://) เบราว์เซอร์จะไม่อนุญาตให้ทำงานครับ<br><br><b style="color:var(--black);">วิธีแก้:</b> ให้อัปโหลดไฟล์นี้ขึ้นระบบเซิร์ฟเวอร์ (เช่น GitHub Pages) แล้วเข้าใช้งานผ่านลิงก์เว็บแทนครับ</p></div>';
+      }
+    }, 4000);
+  });
+</script>
+
 <!-- Toast Notification -->
 <div id="toast" class="toast"></div>
 
 <!-- Loading Overlay -->
-<div id="loading" class="modal-overlay" style="z-index: 9999; flex-direction: column;">
+<div id="loading" class="modal-overlay" style="z-index: 9999; flex-direction: column; display: flex;">
   <div style="font-size: 48px; animation: spin 1s linear infinite;">⏳</div>
   <div style="color: white; margin-top: 16px; font-weight: 600; letter-spacing: 1px;">กำลังเชื่อมต่อระบบ...</div>
 </div>
-<style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
 
 <!-- PAGE: LOGIN / REGISTER -->
 <div id="page-login" class="hidden">
@@ -350,7 +363,11 @@
       <div id="cust-header-logo-fallback" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight: bold; box-shadow: var(--shadow-sm);">ร้าน</div>
       <h3 class="serif" id="cust-header-name" style="font-size: 18px;">ร้านทองพรีเมียม</h3>
     </div>
-    <button class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="logout()">ออกจากระบบ</button>
+    <div class="flex gap-2 items-center">
+      <!-- ปุ่มสลับไปหน้าแอดมิน (จะแสดงเฉพาะแอดมิน) -->
+      <button id="btn-switch-admin" class="btn btn-sm btn-primary hidden" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="switchToAdminView()">กลับหน้าแอดมิน</button>
+      <button class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="logout()">ออกจากระบบ</button>
+    </div>
   </div>
 
   <!-- Content: Home -->
@@ -477,6 +494,7 @@
 
 
 <!-- PAGE: ADMIN APP -->
+<div id="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
 <div id="page-admin" class="hidden admin-layout">
   
   <!-- Sidebar for Desktop (> 1024px) -->
@@ -490,7 +508,8 @@
       <div class="admin-nav-item" onclick="navAdmin('transactions')"><span style="font-size: 20px; width: 24px;">📋</span> ธุรกรรม & อนุมัติ <span id="admin-badge-tx" class="badge bg-red hidden" style="margin-left:auto; font-size: 11px;">0</span></div>
       <div class="admin-nav-item" onclick="navAdmin('users')"><span style="font-size: 20px; width: 24px;">👥</span> จัดการลูกค้า</div>
       <div class="admin-nav-item" id="nav-settings" onclick="navAdmin('settings')"><span style="font-size: 20px; width: 24px;">⚙️</span> ตั้งค่าร้านค้า</div>
-      <div class="admin-nav-item" onclick="navCust('profile', true)"><span style="font-size: 20px; width: 24px;">👤</span> โปรไฟล์ของฉัน</div>
+      <!-- ปุ่มสลับไปมุมมองลูกค้า -->
+      <div class="admin-nav-item" onclick="switchToCustomerView()"><span style="font-size: 20px; width: 24px;">📱</span> มุมมองลูกค้า</div>
     </div>
     <div style="padding: 24px calc(24px + env(safe-area-inset-bottom)); border-top: 1px solid #E5E7EB;">
       <button class="btn btn-outline" style="width: 100%; border-color: #E5E7EB; color: var(--gray-dark);" onclick="logout()">ออกจากระบบ</button>
@@ -590,7 +609,11 @@
         </div>
 
         <h4 class="mt-6 mb-4" style="color: var(--gold-dark); border-bottom: 1px solid #eee; padding-bottom: 8px;">Telegram Backup & Notifications</h4>
-        <div class="form-group"><label>Bot Token</label><input type="text" id="set-tg-token" class="form-control" value="8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw"></div>
+        <div class="form-group">
+          <!-- Bot Token ถูกล็อกไม่ให้แก้ไขตามคำขอ (Readonly) -->
+          <label>Bot Token (ล็อกอัตโนมัติ ห้ามเปลี่ยน)</label>
+          <input type="text" id="set-tg-token" class="form-control" value="8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw" readonly disabled style="opacity: 0.7;">
+        </div>
         <div class="form-group"><label>Chat ID</label><input type="text" id="set-tg-chatid" class="form-control" value="-1003963635991"></div>
         
         <div class="flex gap-2 mt-6 flex-wrap">
@@ -611,7 +634,8 @@
     </div>
     <div class="nav-item" onclick="navAdmin('users')"><span class="nav-icon">👥</span>ลูกค้า</div>
     <div class="nav-item" id="nav-settings-mobile" onclick="navAdmin('settings')"><span class="nav-icon">⚙️</span>ตั้งค่า</div>
-    <div class="nav-item" onclick="navCust('profile', true)"><span class="nav-icon">👤</span>โปรไฟล์</div>
+    <!-- ปุ่มสลับไปมุมมองลูกค้า -->
+    <div class="nav-item" onclick="switchToCustomerView()"><span class="nav-icon">📱</span>หน้าลูกค้า</div>
   </div>
 </div>
 
@@ -646,6 +670,14 @@
   import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+  // System Helpers (Safe Methods that don't break old Safari/iPad)
+  const getEl = (id) => document.getElementById(id);
+  const hideEl = (id) => { const el = getEl(id); if(el) el.classList.add('hidden'); };
+  const showEl = (id) => { const el = getEl(id); if(el) el.classList.remove('hidden'); };
+  const getVal = (id) => { const el = getEl(id); return el ? el.value : ''; };
+  const setVal = (id, val) => { const el = getEl(id); if(el) el.value = val; };
+  const setText = (id, txt) => { const el = getEl(id); if(el) el.textContent = txt; };
+
   const fallbackConfig = {
     apiKey: "AIzaSyD1GnYInbXZHxjX91E25ki2WP-R0a9pWTU",
     authDomain: "gold-savings-517d2.firebaseapp.com",
@@ -675,7 +707,8 @@
     users: safeParseJSON(localStorage.getItem('cache_users'), []),
     transactions: safeParseJSON(localStorage.getItem('cache_txs'), []),
     settings: safeParseJSON(localStorage.getItem('cache_settings'), {
-      shopName: 'ร้านทองพรีเมียม', phone: '', line: '', bankName: '', bankAccName: '', bankAccNo: '', qrBase64: '', shopLogoBase64: '', tgToken: '8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw', tgChatId: '-1003963635991', hasSuperAdmin: false
+      shopName: 'ร้านทองพรีเมียม', phone: '', line: '', bankName: '', bankAccName: '', bankAccNo: '', qrBase64: '', shopLogoBase64: '', 
+      tgToken: '8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw', tgChatId: '-1003963635991', hasSuperAdmin: false
     }),
   };
 
@@ -683,26 +716,26 @@
   let isListenersSetup = false;
 
   window.showToast = (msg, isError = false) => {
-    const t = document.getElementById('toast');
+    const t = getEl('toast');
     if(!t) return;
     t.textContent = msg;
     t.style.background = isError ? "var(--red)" : "var(--black)";
     t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
   };
   
   window.showLoading = (show) => {
-    const el = document.getElementById('loading');
+    const el = getEl('loading');
     if(el) el.style.display = show ? 'flex' : 'none';
   };
   
   window.closeModal = (id) => {
-    const el = document.getElementById(id);
+    const el = getEl(id);
     if(el) el.style.display = 'none';
   };
   
   window.openModal = (id) => {
-    const el = document.getElementById(id);
+    const el = getEl(id);
     if(el) el.style.display = 'flex';
   };
   
@@ -722,7 +755,7 @@
           canvas.width = width; canvas.height = height;
           ctx.drawImage(img, 0, 0, width, height);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-          const el = document.getElementById(imgId);
+          const el = getEl(imgId);
           if(el) {
              el.src = dataUrl;
              el.classList.remove('hidden');
@@ -758,8 +791,12 @@
   };
 
   const initApp = async () => {
-    const savedUser = safeParseJSON(localStorage.getItem('goldAppUser'), null);
-    if (savedUser) window.appState.currentUser = savedUser;
+    try {
+      const savedUserStr = localStorage.getItem('goldAppUser');
+      if (savedUserStr) {
+         window.appState.currentUser = JSON.parse(savedUserStr);
+      }
+    } catch(e) {}
     
     updateSettingsUI();
     routeUser(); 
@@ -788,20 +825,20 @@
     onSnapshot(getDocRef('settings', 'global'), (doc) => {
       if(doc.exists()) {
         window.appState.settings = {...window.appState.settings, ...doc.data()};
-        localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings));
+        try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
         updateSettingsUI();
       }
     });
 
     onSnapshot(getCol('appUsers'), (snap) => {
       window.appState.users = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
+      try { localStorage.setItem('cache_users', JSON.stringify(window.appState.users)); } catch(e){}
       
       if(window.appState.currentUser) {
         const updatedMe = window.appState.users.find(u => u.id === window.appState.currentUser.id);
         if(updatedMe) {
           window.appState.currentUser = updatedMe;
-          localStorage.setItem('goldAppUser', JSON.stringify(updatedMe));
+          try { localStorage.setItem('goldAppUser', JSON.stringify(updatedMe)); } catch(e){}
           updateProfileUI();
         }
       }
@@ -811,7 +848,7 @@
 
     onSnapshot(getCol('transactions'), (snap) => {
       window.appState.transactions = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.date - a.date);
-      localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
+      try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
       
       renderCustomerHistory();
       renderAdminTransactions();
@@ -820,25 +857,48 @@
   };
 
   window.switchAuthTab = (tab) => {
-    document.getElementById('form-login')?.classList.toggle('hidden', tab !== 'login');
-    document.getElementById('form-register')?.classList.toggle('hidden', tab !== 'register');
-    if(document.getElementById('tab-login')) document.getElementById('tab-login').style.background = tab === 'login' ? 'white' : 'transparent';
-    if(document.getElementById('tab-register')) document.getElementById('tab-register').style.background = tab === 'register' ? 'white' : 'transparent';
+    const formLogin = getEl('form-login');
+    if(formLogin) formLogin.classList.toggle('hidden', tab !== 'login');
+    
+    const formReg = getEl('form-register');
+    if(formReg) formReg.classList.toggle('hidden', tab !== 'register');
+    
+    const tabLog = getEl('tab-login');
+    if(tabLog) tabLog.style.background = tab === 'login' ? 'white' : 'transparent';
+    
+    const tabReg = getEl('tab-register');
+    if(tabReg) tabReg.style.background = tab === 'register' ? 'white' : 'transparent';
     
     if(tab === 'register') {
-      document.getElementById('secret-code-group')?.classList.toggle('hidden', window.appState.settings.hasSuperAdmin);
+      const secGroup = getEl('secret-code-group');
+      if(secGroup) secGroup.classList.toggle('hidden', window.appState.settings.hasSuperAdmin);
     }
   };
 
+  // Switch to Customer View
+  window.switchToCustomerView = () => {
+    hideEl('page-admin');
+    showEl('page-customer');
+    showEl('btn-switch-admin');
+    navCust('home');
+  };
+
+  // Switch to Admin View
+  window.switchToAdminView = () => {
+    hideEl('page-customer');
+    showEl('page-admin');
+    navAdmin('dashboard');
+  };
+
   const routeUser = () => {
-    document.getElementById('page-login')?.classList.add('hidden');
-    document.getElementById('page-customer')?.classList.add('hidden');
-    document.getElementById('page-admin')?.classList.add('hidden');
+    hideEl('page-login');
+    hideEl('page-customer');
+    hideEl('page-admin');
     
     showLoading(false);
 
     if(!window.appState.currentUser) {
-      document.getElementById('page-login')?.classList.remove('hidden');
+      showEl('page-login');
       return;
     }
 
@@ -846,30 +906,44 @@
     updateProfileUI();
 
     if(role === 'superadmin' || role === 'subadmin') {
-      document.getElementById('page-admin')?.classList.remove('hidden');
-      if(document.getElementById('nav-settings')) document.getElementById('nav-settings').classList.toggle('hidden', role !== 'superadmin');
-      if(document.getElementById('nav-settings-mobile')) document.getElementById('nav-settings-mobile').classList.toggle('hidden', role !== 'superadmin');
+      showEl('page-admin');
+      
+      const navSet = getEl('nav-settings');
+      if(navSet) navSet.classList.toggle('hidden', role !== 'superadmin');
+      
+      const navSetMob = getEl('nav-settings-mobile');
+      if(navSetMob) navSetMob.classList.toggle('hidden', role !== 'superadmin');
+      
+      showEl('btn-switch-admin');
       navAdmin('dashboard');
     } else {
-      document.getElementById('page-customer')?.classList.remove('hidden');
+      showEl('page-customer');
+      hideEl('btn-switch-admin');
       navCust('home');
     }
   };
 
   window.logout = () => {
     window.appState.currentUser = null;
-    localStorage.removeItem('goldAppUser');
+    try { localStorage.removeItem('goldAppUser'); } catch(e){}
     routeUser();
   };
 
   window.handleRegister = () => {
-    const name = document.getElementById('reg-name')?.value.trim();
-    const phone = document.getElementById('reg-phone')?.value.trim();
-    const pass = document.getElementById('reg-pass')?.value;
-    const secret = document.getElementById('reg-secret')?.value.trim();
+    const name = getVal('reg-name').trim();
+    const phone = getVal('reg-phone').trim();
+    const pass = getVal('reg-pass');
+    const secret = getVal('reg-secret').trim();
 
     if(!name || !phone || !pass) return showToast("กรุณากรอกข้อมูลให้ครบถ้วน", true);
-    if(window.appState.users.find(u => u.phone === phone)) return showToast("เบอร์โทรนี้ถูกใช้งานแล้ว", true);
+    
+    let isUsed = false;
+    if(window.appState.users && window.appState.users.length > 0) {
+       for(let i=0; i<window.appState.users.length; i++) {
+          if(window.appState.users[i].phone === phone) isUsed = true;
+       }
+    }
+    if(isUsed) return showToast("เบอร์โทรนี้ถูกใช้งานแล้ว", true);
 
     showLoading(true);
     let role = 'customer';
@@ -885,28 +959,39 @@
     }
 
     const docId = genId();
-    const newUser = { id: docId, phone, password: pass, name, role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
+    const newUser = { id: docId, phone: phone, password: pass, name: name, role: role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
     safeSetDoc(getDocRef('appUsers', docId), newUser);
     
     window.appState.users.push(newUser);
-    localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
+    try {
+       localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
+       localStorage.setItem('goldAppUser', JSON.stringify(newUser));
+    } catch(e){}
     window.appState.currentUser = newUser;
-    localStorage.setItem('goldAppUser', JSON.stringify(newUser));
     
     showToast("สมัครสมาชิกสำเร็จ!");
     routeUser();
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   window.handleLogin = () => {
-    const phone = document.getElementById('login-phone')?.value.trim();
-    const pass = document.getElementById('login-pass')?.value;
+    const phone = getVal('login-phone').trim();
+    const pass = getVal('login-pass');
     
-    const user = window.appState.users.find(u => u.phone === phone && u.password === pass);
+    let user = null;
+    if(window.appState.users && window.appState.users.length > 0) {
+       for(let i=0; i<window.appState.users.length; i++) {
+          if(window.appState.users[i].phone === phone && window.appState.users[i].password === pass) {
+             user = window.appState.users[i];
+             break;
+          }
+       }
+    }
+    
     if(user) {
       window.appState.currentUser = user;
-      localStorage.setItem('goldAppUser', JSON.stringify(user));
+      try { localStorage.setItem('goldAppUser', JSON.stringify(user)); } catch(e){}
       showToast("เข้าสู่ระบบสำเร็จ");
       routeUser();
     } else {
@@ -919,38 +1004,37 @@
     if(!u) return;
     
     const bal = u.balance || 0;
-    if(document.getElementById('pro-name')) document.getElementById('pro-name').textContent = u.name;
-    if(document.getElementById('edit-name')) document.getElementById('edit-name').value = u.name;
-    if(document.getElementById('edit-phone')) document.getElementById('edit-phone').value = u.phone;
-    if(document.getElementById('edit-email')) document.getElementById('edit-email').value = u.email || '';
+    setText('pro-name', u.name);
+    setVal('edit-name', u.name);
+    setVal('edit-phone', u.phone);
+    setVal('edit-email', u.email || '');
     
     let rText = u.role === 'superadmin' ? 'ผู้ดูแลระบบหลัก' : (u.role === 'subadmin' ? 'ผู้ช่วยผู้ดูแล' : 'ลูกค้า');
-    if(document.getElementById('pro-role')) document.getElementById('pro-role').textContent = rText;
-    if(document.getElementById('cust-balance')) document.getElementById('cust-balance').textContent = bal.toLocaleString();
-    if(document.getElementById('cust-withdraw-max')) document.getElementById('cust-withdraw-max').textContent = bal.toLocaleString();
+    setText('pro-role', rText);
+    setText('cust-balance', bal.toLocaleString());
+    setText('cust-withdraw-max', bal.toLocaleString());
 
     if(u.profilePicBase64) {
-      if(document.getElementById('pro-avatar-img')) {
-         document.getElementById('pro-avatar-img').src = u.profilePicBase64;
-         document.getElementById('pro-avatar-img').style.display = 'block';
-      }
-      if(document.getElementById('pro-avatar-fallback')) document.getElementById('pro-avatar-fallback').style.display = 'none';
-      if(document.getElementById('profile-preview')) {
-         document.getElementById('profile-preview').src = u.profilePicBase64;
-         document.getElementById('profile-preview').classList.remove('hidden');
-      }
+      const img1 = getEl('pro-avatar-img');
+      if(img1) { img1.src = u.profilePicBase64; img1.style.display = 'block'; }
+      
+      const imgFallback = getEl('pro-avatar-fallback');
+      if(imgFallback) imgFallback.style.display = 'none';
+      
+      const imgPrev = getEl('profile-preview');
+      if(imgPrev) { imgPrev.src = u.profilePicBase64; imgPrev.classList.remove('hidden'); }
     }
   };
 
   window.updateProfile = () => {
-    const name = document.getElementById('edit-name')?.value;
-    const email = document.getElementById('edit-email')?.value;
-    const picInput = document.getElementById('edit-profile-pic');
+    const name = getVal('edit-name');
+    const email = getVal('edit-email');
+    const picInput = getEl('edit-profile-pic');
     
     showLoading(true);
     
-    let updateData = { name, email };
-    if(picInput && picInput.dataset.base64) {
+    let updateData = { name: name, email: email };
+    if(picInput && picInput.dataset && picInput.dataset.base64) {
       updateData.profilePicBase64 = picInput.dataset.base64;
       window.appState.currentUser.profilePicBase64 = picInput.dataset.base64;
     }
@@ -961,11 +1045,11 @@
     
     showToast("บันทึกโปรไฟล์สำเร็จ");
     updateProfileUI();
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   window.updatePassword = () => {
-    const pass = document.getElementById('edit-pass')?.value;
+    const pass = getVal('edit-pass');
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
     showLoading(true);
     
@@ -973,102 +1057,118 @@
     safeUpdateDoc(getDocRef('appUsers', window.appState.currentUser.id), { password: pass });
     
     showToast("เปลี่ยนรหัสผ่านสำเร็จ");
-    if(document.getElementById('edit-pass')) document.getElementById('edit-pass').value = '';
-    setTimeout(() => showLoading(false), 200);
+    setVal('edit-pass', '');
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
-  window.navCust = (tab, fromAdmin = false) => {
+  window.navCust = (tab) => {
     document.querySelectorAll('#page-customer .app-container').forEach(e => e.classList.add('hidden'));
     document.querySelectorAll('#page-customer .bottom-nav .nav-item').forEach(e => e.classList.remove('active'));
     
-    if(fromAdmin) {
-       document.getElementById('page-admin')?.classList.add('hidden');
-       document.getElementById('page-customer')?.classList.remove('hidden');
-       if(document.querySelector('.app-header button')) {
-           document.querySelector('.app-header button').setAttribute('onclick', 'routeUser()');
-           document.querySelector('.app-header button').textContent = 'กลับหน้าแอดมิน';
-       }
-    } else {
-       if(document.querySelector('.app-header button')) {
-           document.querySelector('.app-header button').setAttribute('onclick', 'logout()');
-           document.querySelector('.app-header button').textContent = 'ออกจากระบบ';
-       }
-    }
-
-    document.getElementById(`cust-content-${tab}`)?.classList.remove('hidden');
+    showEl(`cust-content-${tab}`);
     const navItem = document.querySelector(`#page-customer .bottom-nav .nav-item[onclick="navCust('${tab}')"]`);
     if(navItem) navItem.classList.add('active');
     window.scrollTo(0, 0); 
   };
 
   window.submitDeposit = () => {
-    const amount = parseFloat(document.getElementById('dep-amount')?.value);
-    const remark = document.getElementById('dep-remark')?.value;
-    const slipInput = document.getElementById('dep-slip');
-    const slipBase64 = slipInput?.dataset?.base64;
+    const amtEl = getEl('dep-amount');
+    const amount = amtEl ? parseFloat(amtEl.value) : 0;
+    const remark = getVal('dep-remark');
+    const slipInput = getEl('dep-slip');
+    const slipBase64 = (slipInput && slipInput.dataset) ? slipInput.dataset.base64 : '';
 
     if(!amount || amount <= 0) return showToast("กรุณาระบุยอดเงินที่ถูกต้อง", true);
     if(!slipBase64) return showToast("กรุณาแนบสลิปโอนเงิน", true);
 
     showLoading(true);
     const tx = {
-      id: genId(), userId: window.appState.currentUser.id, userName: window.appState.currentUser.name,
-      type: 'deposit', amount, remark, slipBase64, status: 'pending', date: Date.now()
+      id: genId(), 
+      userId: window.appState.currentUser ? window.appState.currentUser.id : '', 
+      userName: window.appState.currentUser ? window.appState.currentUser.name : '',
+      type: 'deposit', 
+      amount: amount, 
+      remark: remark, 
+      slipBase64: slipBase64, 
+      status: 'pending', 
+      date: Date.now()
     };
     
     safeSetDoc(getDocRef('transactions', tx.id), tx);
     window.appState.transactions.unshift(tx);
-    localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
+    try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
     
     sendTgMsg(`📥 <b>แจ้งเตือนฝากออม</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nสถานะ: รอตรวจสอบ`);
     
-    if(document.getElementById('dep-amount')) document.getElementById('dep-amount').value = '';
-    if(document.getElementById('dep-remark')) document.getElementById('dep-remark').value = '';
-    document.getElementById('dep-preview')?.classList.add('hidden');
+    setVal('dep-amount', '');
+    setVal('dep-remark', '');
+    
+    const prev = getEl('dep-preview');
+    if(prev) prev.classList.add('hidden');
+    
     if(slipInput) { slipInput.value = ''; slipInput.dataset.base64 = ''; }
     
     showToast("ส่งคำขอฝากออมสำเร็จ รอตรวจสอบ");
     renderCustomerHistory();
     navCust('history');
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   window.submitWithdraw = () => {
-    const amount = parseFloat(document.getElementById('wit-amount')?.value);
-    const remark = document.getElementById('wit-remark')?.value;
-    const max = window.appState.currentUser.balance || 0;
+    const amtEl = getEl('wit-amount');
+    const amount = amtEl ? parseFloat(amtEl.value) : 0;
+    const remark = getVal('wit-remark');
+    const max = (window.appState.currentUser && window.appState.currentUser.balance) ? window.appState.currentUser.balance : 0;
 
     if(!amount || amount <= 0) return showToast("กรุณาระบุยอดเงินที่ถูกต้อง", true);
     if(amount > max) return showToast("ยอดเงินออมไม่เพียงพอ", true);
 
     showLoading(true);
     const tx = {
-      id: genId(), userId: window.appState.currentUser.id, userName: window.appState.currentUser.name,
-      type: 'withdraw', amount, remark, status: 'pending', date: Date.now()
+      id: genId(), 
+      userId: window.appState.currentUser ? window.appState.currentUser.id : '', 
+      userName: window.appState.currentUser ? window.appState.currentUser.name : '',
+      type: 'withdraw', 
+      amount: amount, 
+      remark: remark, 
+      status: 'pending', 
+      date: Date.now()
     };
     
     safeSetDoc(getDocRef('transactions', tx.id), tx);
     window.appState.transactions.unshift(tx);
-    localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
+    try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
     
     sendTgMsg(`📤 <b>แจ้งเตือนขอถอนเงิน/แลกทอง</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nหมายเหตุ: ${remark}\nสถานะ: รอตรวจสอบ`);
     
-    if(document.getElementById('wit-amount')) document.getElementById('wit-amount').value = '';
-    if(document.getElementById('wit-remark')) document.getElementById('wit-remark').value = '';
+    setVal('wit-amount', '');
+    setVal('wit-remark', '');
     
     showToast("ส่งคำขอถอนสำเร็จ รอร้านยืนยัน");
     renderCustomerHistory();
     navCust('history');
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   const renderCustomerHistory = () => {
-    const txs = window.appState.transactions.filter(t => t.userId === window.appState.currentUser?.id);
+    let txs = [];
+    const myId = window.appState.currentUser ? window.appState.currentUser.id : null;
+    
+    if(window.appState.transactions) {
+       for(let i=0; i<window.appState.transactions.length; i++) {
+          if(window.appState.transactions[i].userId === myId) txs.push(window.appState.transactions[i]);
+       }
+    }
+
     const renderList = (containerId, limit = 0) => {
-      const el = document.getElementById(containerId);
+      const el = getEl(containerId);
       if(!el) return;
       el.innerHTML = '';
-      const list = limit ? txs.slice(0,limit) : txs;
+      
+      let list = txs;
+      if(limit > 0 && txs.length > limit) {
+         list = txs.slice(0, limit);
+      }
       
       if(list.length === 0) { el.innerHTML = '<div style="text-align:center; padding:20px; color:gray;">ยังไม่มีรายการธุรกรรม</div>'; return; }
 
@@ -1077,6 +1177,8 @@
         let color = t.type==='deposit' ? 'var(--green)' : 'var(--red)';
         let statusBadge = t.status==='approved' ? '<span class="badge bg-green">สำเร็จ</span>' : (t.status==='rejected' ? '<span class="badge bg-red">ถูกปฏิเสธ</span>' : '<span class="badge bg-yellow">รออนุมัติ</span>');
         let d = new Date(t.date).toLocaleString('th-TH');
+        
+        let amt = t.amount ? t.amount : 0;
         
         el.innerHTML += `
           <div class="flex justify-between items-center tx-item-history" style="padding: 14px 0; border-bottom: 1px solid #eee;">
@@ -1088,7 +1190,7 @@
               </div>
             </div>
             <div class="tx-amount-col">
-              <div style="font-weight:700; color:${color}; font-size:15px;">฿${(t.amount || 0).toLocaleString()}</div>
+              <div style="font-weight:700; color:${color}; font-size:15px;">฿${amt.toLocaleString()}</div>
               <div style="margin-top:4px;">${statusBadge}</div>
             </div>
           </div>
@@ -1100,49 +1202,58 @@
   };
 
   window.navAdmin = (sec) => {
-    // Hide all admin content sections
     document.querySelectorAll('#admin-content-area > div').forEach(e => {
-       if(e.id !== 'admin-page-title' && !e.id.includes('title') && !e.classList.contains('admin-topbar')) e.classList.add('hidden');
+       if(e.id !== 'admin-page-title' && e.id.indexOf('title') === -1 && !e.classList.contains('admin-topbar')) e.classList.add('hidden');
     });
-    // Remove active class
+    
     document.querySelectorAll('.admin-nav-item, .admin-bottom-nav .nav-item').forEach(e => e.classList.remove('active'));
     
-    // Show section
-    document.getElementById(`admin-sec-${sec}`)?.classList.remove('hidden');
+    showEl(`admin-sec-${sec}`);
     
-    // Add active to Desktop nav
     const elDesktop = document.querySelector(`.admin-sidebar .admin-nav-item[onclick="navAdmin('${sec}')"]`);
     if(elDesktop) elDesktop.classList.add('active');
 
-    // Add active to Mobile nav
     const elMobile = document.querySelector(`.admin-bottom-nav .nav-item[onclick="navAdmin('${sec}')"]`);
     if(elMobile) elMobile.classList.add('active');
     
     const titles = { dashboard: 'ภาพรวมระบบ', transactions: 'รายการธุรกรรม', users: 'จัดการผู้ใช้งาน', settings: 'ตั้งค่าร้านค้า' };
     const titleText = titles[sec] || sec;
-    if(document.getElementById('admin-page-title')) document.getElementById('admin-page-title').textContent = titleText;
-    if(document.getElementById('admin-page-title-mobile')) document.getElementById('admin-page-title-mobile').textContent = titleText;
+    setText('admin-page-title', titleText);
+    setText('admin-page-title-mobile', titleText);
     
     window.scrollTo(0, 0);
   };
 
-  // ไม่ได้ใช้ Sidebar แบบเลื่อนแล้ว แต่ป้องกัน error ทิ้งไว้
   window.toggleAdminSidebar = () => {};
 
   const updateDashboardStats = () => {
-    let bal = window.appState.users.reduce((sum, u) => sum + (u.balance || 0), 0);
-    let pending = window.appState.transactions.filter(t => t.status === 'pending').length;
+    let bal = 0;
+    let usersCount = 0;
     
-    if(document.getElementById('stat-total-balance')) document.getElementById('stat-total-balance').textContent = bal.toLocaleString();
-    if(document.getElementById('stat-total-users')) document.getElementById('stat-total-users').textContent = window.appState.users.filter(u=>u.role!=='superadmin').length;
-    if(document.getElementById('stat-pending')) document.getElementById('stat-pending').textContent = pending;
+    if(window.appState.users) {
+       for(let i=0; i<window.appState.users.length; i++) {
+          bal += (window.appState.users[i].balance || 0);
+          if(window.appState.users[i].role !== 'superadmin') usersCount++;
+       }
+    }
     
-    const badgeDesktop = document.getElementById('admin-badge-tx');
+    let pending = 0;
+    if(window.appState.transactions) {
+       for(let i=0; i<window.appState.transactions.length; i++) {
+          if(window.appState.transactions[i].status === 'pending') pending++;
+       }
+    }
+    
+    setText('stat-total-balance', bal.toLocaleString());
+    setText('stat-total-users', usersCount);
+    setText('stat-pending', pending);
+    
+    const badgeDesktop = getEl('admin-badge-tx');
     if(badgeDesktop) {
         badgeDesktop.textContent = pending;
         badgeDesktop.classList.toggle('hidden', pending === 0);
     }
-    const badgeMobile = document.getElementById('admin-badge-tx-mobile');
+    const badgeMobile = getEl('admin-badge-tx-mobile');
     if(badgeMobile) {
         badgeMobile.textContent = pending;
         badgeMobile.classList.toggle('hidden', pending === 0);
@@ -1154,6 +1265,8 @@
     if(!tbody) return;
     tbody.innerHTML = '';
 
+    if(!window.appState.transactions) return;
+
     window.appState.transactions.forEach(t => {
       let tr = document.createElement('tr');
       let statusStr = t.status==='approved' ? '<span class="badge bg-green">สำเร็จ</span>' : (t.status==='rejected' ? '<span class="badge bg-red">ปฏิเสธ</span>' : '<span class="badge bg-yellow">รอตรวจสอบ</span>');
@@ -1161,11 +1274,14 @@
       let slipBtn = t.slipBase64 ? `<button class="btn btn-sm btn-outline" style="padding:6px 10px; font-size:12px;" onclick="viewSlip('${t.id}')">รูปสลิป</button>` : '-';
       
       let actionBtns = '-';
+      let amt = t.amount ? t.amount : 0;
+      let rm = t.remark ? t.remark : '-';
+
       if(t.status === 'pending') {
         if(t.type === 'deposit') {
           actionBtns = `<button class="btn btn-sm btn-success" onclick="approveTx('${t.id}')">✓ อนุมัติ</button> <button class="btn btn-sm btn-danger" onclick="rejectTx('${t.id}')">✗ ปฏิเสธ</button>`;
         } else {
-          actionBtns = `<button class="btn btn-sm btn-success" onclick="openEditWithdraw('${t.id}', ${t.amount || 0})">พิจารณาถอน</button> <button class="btn btn-sm btn-danger" onclick="rejectTx('${t.id}')">ปฏิเสธ</button>`;
+          actionBtns = `<button class="btn btn-sm btn-success" onclick="openEditWithdraw('${t.id}', ${amt})">พิจารณาถอน</button> <button class="btn btn-sm btn-danger" onclick="rejectTx('${t.id}')">ปฏิเสธ</button>`;
         }
       }
 
@@ -1173,8 +1289,8 @@
         <td style="color:var(--gray); font-size:13px;">${d}</td>
         <td><b>${t.userName}</b></td>
         <td><span class="badge ${t.type==='deposit'?'bg-green':'bg-red'}">${t.type==='deposit'?'ฝากออม':'ถอนทอง'}</span></td>
-        <td style="font-weight:bold; color:${t.type==='deposit'?'var(--green)':'var(--red)'}; font-size:15px;">฿${(t.amount || 0).toLocaleString()}</td>
-        <td><div style="font-size:13px; max-width: 150px; overflow:hidden; text-overflow:ellipsis;" title="${t.remark||''}">${t.remark||'-'}</div>${slipBtn}</td>
+        <td style="font-weight:bold; color:${t.type==='deposit'?'var(--green)':'var(--red)'}; font-size:15px;">฿${amt.toLocaleString()}</td>
+        <td><div style="font-size:13px; max-width: 150px; overflow:hidden; text-overflow:ellipsis;" title="${rm}">${rm}</div>${slipBtn}</td>
         <td>${statusStr}</td>
         <td><div class="flex gap-2">${actionBtns}</div></td>
       `;
@@ -1186,26 +1302,30 @@
     const tbody = document.querySelector('#table-users tbody');
     if(!tbody) return;
     tbody.innerHTML = '';
-    const myRole = window.appState.currentUser?.role;
+    const myRole = window.appState.currentUser ? window.appState.currentUser.role : '';
+    const myId = window.appState.currentUser ? window.appState.currentUser.id : '';
+
+    if(!window.appState.users) return;
 
     window.appState.users.forEach(u => {
       let tr = document.createElement('tr');
       let rText = u.role === 'superadmin' ? '<span class="badge bg-gold">Super Admin</span>' : (u.role === 'subadmin' ? '<span class="badge bg-green">Admin</span>' : '<span class="badge" style="background:#eee; color:var(--black)">ลูกค้า</span>');
       
       let actionBtns = '-';
-      if(myRole === 'superadmin' && u.id !== window.appState.currentUser.id) {
+      if(myRole === 'superadmin' && u.id !== myId) {
         let toggleRole = u.role === 'customer' ? `<button class="btn btn-sm btn-outline" onclick="changeRole('${u.id}', 'subadmin')">ตั้งเป็น Admin</button>` : `<button class="btn btn-sm btn-outline" style="border-color:var(--red); color:var(--red)" onclick="changeRole('${u.id}', 'customer')">ปลด Admin</button>`;
         actionBtns = toggleRole;
       }
       
       let userAvatar = u.profilePicBase64 ? `<img src="${u.profilePicBase64}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:50%; background:var(--gray-light); display:flex; align-items:center; justify-content:center; font-size:16px;">👤</div>`;
+      let bal = u.balance ? u.balance : 0;
 
       tr.innerHTML = `
         <td>${userAvatar}</td>
         <td><b style="font-size:15px;">${u.name}</b></td>
         <td style="color:var(--gray);">${u.phone}</td>
         <td>${rText}</td>
-        <td style="font-weight:bold; color:var(--gold-dark); font-size:15px;">฿${(u.balance||0).toLocaleString()}</td>
+        <td style="font-weight:bold; color:var(--gold-dark); font-size:15px;">฿${bal.toLocaleString()}</td>
         <td>${actionBtns}</td>
       `;
       tbody.appendChild(tr);
@@ -1215,33 +1335,43 @@
   window.changeRole = (uid, newRole) => {
     if(confirm(`ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้เป็น ${newRole} ใช่หรือไม่?`)) {
       showLoading(true);
-      const u = window.appState.users.find(x => x.id === uid);
-      if(u) u.role = newRole;
+      
+      let targetUser = null;
+      for(let i=0; i<window.appState.users.length; i++){
+         if(window.appState.users[i].id === uid) targetUser = window.appState.users[i];
+      }
+      
+      if(targetUser) targetUser.role = newRole;
       safeUpdateDoc(getDocRef('appUsers', uid), { role: newRole });
       
       renderAdminUsers();
       showToast("เปลี่ยนสิทธิ์สำเร็จ");
-      setTimeout(() => showLoading(false), 200);
+      setTimeout(() => { showLoading(false); }, 200);
     }
   };
 
   window.viewSlip = (txId) => {
-    const tx = window.appState.transactions.find(t => t.id === txId);
+    let tx = null;
+    for(let i=0; i<window.appState.transactions.length; i++){
+       if(window.appState.transactions[i].id === txId) tx = window.appState.transactions[i];
+    }
+    
     if(tx && tx.slipBase64) {
-      document.getElementById('slip-image-full').src = tx.slipBase64;
-      openModal('modal-view-slip');
+      const img = getEl('slip-image-full');
+      if(img) { img.src = tx.slipBase64; openModal('modal-view-slip'); }
     }
   };
 
   window.openEditWithdraw = (txId, reqAmount) => {
     pendingTxId = txId;
-    if(document.getElementById('mw-req-amt')) document.getElementById('mw-req-amt').textContent = (reqAmount || 0).toLocaleString();
-    if(document.getElementById('mw-app-amt')) document.getElementById('mw-app-amt').value = reqAmount || 0;
+    setText('mw-req-amt', (reqAmount || 0).toLocaleString());
+    setVal('mw-app-amt', reqAmount || 0);
     openModal('modal-edit-withdraw');
   };
 
   window.confirmApproveWithdraw = () => {
-    const appAmt = parseFloat(document.getElementById('mw-app-amt')?.value);
+    const el = getEl('mw-app-amt');
+    const appAmt = el ? parseFloat(el.value) : 0;
     if(isNaN(appAmt) || appAmt <= 0) return showToast("ยอดเงินไม่ถูกต้อง", true);
     closeModal('modal-edit-withdraw');
     processTx(pendingTxId, 'approved', appAmt);
@@ -1262,19 +1392,33 @@
 
   const processTx = (txId, status, overrideAmount = null, rejectReason = "") => {
     showLoading(true);
-    const tx = window.appState.transactions.find(t => t.id === txId);
-    if(!tx) return showLoading(false);
+    
+    let tx = null;
+    if(window.appState.transactions) {
+       for(let i=0; i<window.appState.transactions.length; i++) {
+          if(window.appState.transactions[i].id === txId) tx = window.appState.transactions[i];
+       }
+    }
+    
+    if(!tx) { showLoading(false); return; }
 
-    const user = window.appState.users.find(u => u.id === tx.userId);
-    let finalAmount = overrideAmount !== null ? overrideAmount : (tx.amount || 0);
+    let user = null;
+    if(window.appState.users) {
+       for(let i=0; i<window.appState.users.length; i++) {
+          if(window.appState.users[i].id === tx.userId) user = window.appState.users[i];
+       }
+    }
 
-    if(status === 'approved') {
-      let newBalance = user.balance || 0;
+    let finalAmount = overrideAmount !== null ? overrideAmount : (tx.amount ? tx.amount : 0);
+
+    if(status === 'approved' && user) {
+      let newBalance = user.balance ? user.balance : 0;
       if(tx.type === 'deposit') newBalance += finalAmount;
       else if(tx.type === 'withdraw') {
         if(finalAmount > newBalance) {
           showToast("ลูกค้ามียอดไม่พอให้หัก", true);
-          return showLoading(false);
+          showLoading(false);
+          return;
         }
         newBalance -= finalAmount;
       }
@@ -1283,17 +1427,21 @@
     }
 
     tx.status = status;
-    let updateData = { status };
+    let updateData = { status: status };
     if(overrideAmount !== null) { tx.amount = overrideAmount; updateData.amount = overrideAmount; }
     if(rejectReason) {
-      tx.remark = (tx.remark||'') + ` [ปฏิเสธ: ${rejectReason}]`;
+      const rm = tx.remark ? tx.remark : '';
+      tx.remark = rm + ` [ปฏิเสธ: ${rejectReason}]`;
       updateData.remark = tx.remark;
     }
 
     safeUpdateDoc(getDocRef('transactions', txId), updateData);
     
-    localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
-    localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
+    try {
+      localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
+      localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
+    } catch(e){}
+    
     renderAdminTransactions();
     renderAdminUsers();
     updateDashboardStats();
@@ -1302,81 +1450,80 @@
     sendTgMsg(`อัปเดตสถานะธุรกรรม\nผู้ใช้: ${tx.userName}\nประเภท: ${tx.type==='deposit'?'ฝาก':'ถอน'}\nยอด: ฿${finalAmount.toLocaleString()}\nสถานะ: ${statTh}`);
     
     showToast("ดำเนินการสำเร็จ");
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   const updateSettingsUI = () => {
     const s = window.appState.settings;
-    if(document.getElementById('cust-header-name')) document.getElementById('cust-header-name').textContent = s.shopName || 'ร้านออมทอง';
-    if(document.getElementById('admin-shop-name')) document.getElementById('admin-shop-name').textContent = s.shopName || 'ร้านออมทอง';
-    if(document.getElementById('admin-shop-name-sidebar')) document.getElementById('admin-shop-name-sidebar').textContent = s.shopName || 'ร้านออมทอง';
     
-    if(document.getElementById('cust-bank-name')) document.getElementById('cust-bank-name').textContent = s.bankName || '-';
-    if(document.getElementById('cust-bank-accname')) document.getElementById('cust-bank-accname').textContent = s.bankAccName || '-';
-    if(document.getElementById('cust-bank-accno')) document.getElementById('cust-bank-accno').textContent = s.bankAccNo || '-';
-    if(document.getElementById('cust-shop-contact')) document.getElementById('cust-shop-contact').innerHTML = `โทร: ${s.phone || '-'} <br> Line: ${s.line || '-'}`;
+    const sName = s.shopName ? s.shopName : 'ร้านออมทอง';
+    setText('cust-header-name', sName);
+    setText('admin-shop-name', sName);
+    setText('admin-shop-name-sidebar', sName);
+    
+    setText('cust-bank-name', s.bankName ? s.bankName : '-');
+    setText('cust-bank-accname', s.bankAccName ? s.bankAccName : '-');
+    setText('cust-bank-accno', s.bankAccNo ? s.bankAccNo : '-');
+    
+    const contactHtml = `โทร: ${s.phone ? s.phone : '-'} <br> Line: ${s.line ? s.line : '-'}`;
+    const elCont = getEl('cust-shop-contact');
+    if(elCont) elCont.innerHTML = contactHtml;
     
     if(s.shopLogoBase64) {
-      if(document.getElementById('cust-header-logo')) {
-          document.getElementById('cust-header-logo').src = s.shopLogoBase64;
-          document.getElementById('cust-header-logo').style.display = 'block';
-      }
-      if(document.getElementById('cust-header-logo-fallback')) document.getElementById('cust-header-logo-fallback').style.display = 'none';
-      if(document.getElementById('set-logo-preview')) {
-          document.getElementById('set-logo-preview').src = s.shopLogoBase64;
-          document.getElementById('set-logo-preview').classList.remove('hidden');
-      }
+      const lg = getEl('cust-header-logo');
+      if(lg) { lg.src = s.shopLogoBase64; lg.style.display = 'block'; }
+      const lfb = getEl('cust-header-logo-fallback');
+      if(lfb) lfb.style.display = 'none';
+      const lp = getEl('set-logo-preview');
+      if(lp) { lp.src = s.shopLogoBase64; lp.classList.remove('hidden'); }
     }
 
     if(s.qrBase64) {
-      if(document.getElementById('cust-qr-img')) {
-          document.getElementById('cust-qr-img').src = s.qrBase64;
-          document.getElementById('cust-qr-img').style.display = 'block';
-      }
-      if(document.getElementById('cust-qr-placeholder')) document.getElementById('cust-qr-placeholder').style.display = 'none';
-      if(document.getElementById('set-qr-preview')) {
-          document.getElementById('set-qr-preview').src = s.qrBase64;
-          document.getElementById('set-qr-preview').classList.remove('hidden');
-      }
+      const qg = getEl('cust-qr-img');
+      if(qg) { qg.src = s.qrBase64; qg.style.display = 'block'; }
+      const qfb = getEl('cust-qr-placeholder');
+      if(qfb) qfb.style.display = 'none';
+      const qp = getEl('set-qr-preview');
+      if(qp) { qp.src = s.qrBase64; qp.classList.remove('hidden'); }
     }
 
-    if(document.getElementById('set-shopname')) document.getElementById('set-shopname').value = s.shopName || '';
-    if(document.getElementById('set-phone')) document.getElementById('set-phone').value = s.phone || '';
-    if(document.getElementById('set-line')) document.getElementById('set-line').value = s.line || '';
-    if(document.getElementById('set-bankname')) document.getElementById('set-bankname').value = s.bankName || '';
-    if(document.getElementById('set-bankaccname')) document.getElementById('set-bankaccname').value = s.bankAccName || '';
-    if(document.getElementById('set-bankaccno')) document.getElementById('set-bankaccno').value = s.bankAccNo || '';
-    if(document.getElementById('set-tg-token')) document.getElementById('set-tg-token').value = s.tgToken || '';
-    if(document.getElementById('set-tg-chatid')) document.getElementById('set-tg-chatid').value = s.tgChatId || '';
+    setVal('set-shopname', s.shopName ? s.shopName : '');
+    setVal('set-phone', s.phone ? s.phone : '');
+    setVal('set-line', s.line ? s.line : '');
+    setVal('set-bankname', s.bankName ? s.bankName : '');
+    setVal('set-bankaccname', s.bankAccName ? s.bankAccName : '');
+    setVal('set-bankaccno', s.bankAccNo ? s.bankAccNo : '');
+    setVal('set-tg-chatid', s.tgChatId ? s.tgChatId : '');
+    // Bot token remains hardcoded and fixed
   };
 
   window.saveSettings = () => {
     showLoading(true);
     const newData = {
-      shopName: document.getElementById('set-shopname')?.value || '',
-      phone: document.getElementById('set-phone')?.value || '',
-      line: document.getElementById('set-line')?.value || '',
-      bankName: document.getElementById('set-bankname')?.value || '',
-      bankAccName: document.getElementById('set-bankaccname')?.value || '',
-      bankAccNo: document.getElementById('set-bankaccno')?.value || '',
-      tgToken: document.getElementById('set-tg-token')?.value || '',
-      tgChatId: document.getElementById('set-tg-chatid')?.value || '',
+      shopName: getVal('set-shopname'),
+      phone: getVal('set-phone'),
+      line: getVal('set-line'),
+      bankName: getVal('set-bankname'),
+      bankAccName: getVal('set-bankaccname'),
+      bankAccNo: getVal('set-bankaccno'),
+      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw", // FIXED BOT TOKEN 100%
+      tgChatId: getVal('set-tg-chatid')
     };
     
-    const qrInput = document.getElementById('set-qr-code');
-    if(qrInput && qrInput.dataset.base64) newData.qrBase64 = qrInput.dataset.base64;
+    const qrInput = getEl('set-qr-code');
+    if(qrInput && qrInput.dataset && qrInput.dataset.base64) newData.qrBase64 = qrInput.dataset.base64;
 
-    const logoInput = document.getElementById('set-shop-logo');
-    if(logoInput && logoInput.dataset.base64) newData.shopLogoBase64 = logoInput.dataset.base64;
+    const logoInput = getEl('set-shop-logo');
+    if(logoInput && logoInput.dataset && logoInput.dataset.base64) newData.shopLogoBase64 = logoInput.dataset.base64;
 
     window.appState.settings = {...window.appState.settings, ...newData};
-    localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings));
+    try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
     updateSettingsUI();
 
     safeSetDoc(getDocRef('settings', 'global'), newData, {merge:true});
     
     showToast("บันทึกการตั้งค่าสำเร็จ");
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   const sendTgMsg = async (text) => {
@@ -1403,12 +1550,17 @@
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
     if(type === 'users') {
       csvContent += "Name,Phone,Role,Balance\n";
-      data.forEach(u => { csvContent += `"${u.name}","${u.phone}","${u.role}","${u.balance||0}"\n`; });
+      data.forEach(u => { 
+        let b = u.balance ? u.balance : 0;
+        csvContent += `"${u.name}","${u.phone}","${u.role}","${b}"\n`; 
+      });
     } else {
       csvContent += "Date,UserName,Type,Amount,Status,Remark\n";
       data.forEach(t => { 
         let d = new Date(t.date).toLocaleString('th-TH');
-        csvContent += `"${d}","${t.userName}","${t.type}","${t.amount||0}","${t.status}","${t.remark||''}"\n`; 
+        let amt = t.amount ? t.amount : 0;
+        let rm = t.remark ? t.remark : '';
+        csvContent += `"${d}","${t.userName}","${t.type}","${amt}","${t.status}","${rm}"\n`; 
       });
     }
     
@@ -1423,9 +1575,16 @@
 
   window.backupToTelegram = async () => {
     showLoading(true);
-    let userCount = window.appState.users.length;
-    let totalBal = window.appState.users.reduce((s,u)=>s+(u.balance||0),0);
-    let txCount = window.appState.transactions.length;
+    let userCount = window.appState.users ? window.appState.users.length : 0;
+    
+    let totalBal = 0;
+    if(window.appState.users) {
+       for(let i=0; i<window.appState.users.length; i++){
+          totalBal += (window.appState.users[i].balance ? window.appState.users[i].balance : 0);
+       }
+    }
+    
+    let txCount = window.appState.transactions ? window.appState.transactions.length : 0;
     
     let msg = `📦 <b>Weekly Backup Report</b>\n` +
               `วันที่: ${new Date().toLocaleString('th-TH')}\n\n` +
@@ -1435,13 +1594,14 @@
               `<i>หมายเหตุ: แอดมินสามารถโหลดข้อมูลแบบละเอียด(Excel) ได้จากระบบหลังบ้าน</i>`;
     
     await sendTgMsg(msg);
-    localStorage.setItem('goldAppLastBackup', Date.now().toString());
+    try { localStorage.setItem('goldAppLastBackup', Date.now().toString()); } catch(e){}
     showToast("ส่ง Backup เข้า Telegram สำเร็จ");
-    setTimeout(() => showLoading(false), 200);
+    setTimeout(() => { showLoading(false); }, 200);
   };
 
   const checkAndRunBackup = () => {
-    const last = localStorage.getItem('goldAppLastBackup');
+    let last = null;
+    try { last = localStorage.getItem('goldAppLastBackup'); } catch(e){}
     const now = Date.now();
     if(!last || (now - parseInt(last)) > 604800000) {
        backupToTelegram();
