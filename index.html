@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -49,7 +50,7 @@
   .mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
   .text-center { text-align: center; }
   
-  /* Buttons - Touch Friendly */
+  /* Buttons */
   .btn { 
     padding: 14px 20px; 
     border-radius: 14px; 
@@ -113,7 +114,7 @@
   /* Login Page */
   #page-login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #FAFAFB 0%, var(--gold-light) 100%); }
   .login-box { width: 100%; max-width: 400px; background: white; padding: 40px 30px; border-radius: 24px; box-shadow: var(--shadow-md); text-align: center; }
-  .login-logo { width: 80px; height: 80px; background: var(--gold-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
+  .login-logo { width: 80px; height: 80px; background: var(--gold-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; overflow: hidden; box-shadow: var(--shadow-sm); }
   
   /* Customer Nav Elements */
   .app-header { 
@@ -309,8 +310,12 @@
 <!-- PAGE: LOGIN / REGISTER -->
 <div id="page-login" class="hidden">
   <div class="login-box">
-    <div class="login-logo">✨</div>
-    <h1 class="serif" style="margin-bottom: 8px;">พรีเมียมออมทอง</h1>
+    <!-- ปรับโลโก้ให้เปลี่ยนตามหน้าร้าน -->
+    <div class="login-logo" id="login-logo-container">
+      <img id="login-logo-img" src="" alt="โลโก้ร้าน" style="display:none; width: 100%; height: 100%; object-fit: cover;">
+      <span id="login-logo-fallback">✨</span>
+    </div>
+    <h1 class="serif" style="margin-bottom: 8px;" id="login-shop-name">พรีเมียมออมทอง</h1>
     <p style="color: var(--gray); margin-bottom: 24px; font-size: 14px;">ระบบสะสมเงินออมเพื่อรับทองคำ</p>
     
     <div class="flex gap-2 mb-4" style="background: var(--gray-light); padding: 4px; border-radius: 14px;">
@@ -439,11 +444,14 @@
         <input type="text" id="wit-remark" class="form-control" placeholder="เช่น ต้องการทองแท่ง / มารับหน้าร้าน">
       </div>
       
-      <!-- Contact Box (Updated to include Clickable Buttons) -->
+      <!-- แยกส่วนติดต่อร้านตามที่ขอ -->
       <div class="form-group" style="background: #FEF3C7; padding: 20px; border-radius: 16px; margin-top: 24px; text-align:center;">
         <label style="color: #92400E; font-size: 14px; margin-bottom: 12px; display:block;">📞 ติดต่อร้านทองเพื่อยืนยันการถอน</label>
-        <div id="cust-shop-contact" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.8;">
-          <!-- Content will be injected here via JS -->
+        <div id="cust-shop-contact-details" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.8; margin-bottom: 12px;">
+          <!-- ข้อมูลเบอร์ และ ID จะถูกแทรกที่นี่ -->
+        </div>
+        <div id="cust-shop-contact-btn">
+          <!-- ปุ่มลิงก์จะถูกแทรกที่นี่ -->
         </div>
       </div>
       
@@ -599,7 +607,6 @@
         <div class="form-group"><label>ชื่อร้าน</label><input type="text" id="set-shopname" class="form-control"></div>
         <div class="form-group"><label>เบอร์โทรติดต่อ</label><input type="text" id="set-phone" class="form-control"></div>
         
-        <!-- แยกไอดีและลิงก์ไลน์ ตามที่รีเควส -->
         <div class="form-group"><label>Line ID (ไอดีไลน์)</label><input type="text" id="set-line-id" class="form-control" placeholder="เช่น @goldshop"></div>
         <div class="form-group"><label>ลิงก์เพิ่มเพื่อน Line (URL)</label><input type="text" id="set-line-link" class="form-control" placeholder="เช่น https://line.me/ti/p/..."></div>
         
@@ -674,7 +681,6 @@
   import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // System Helpers
   const getEl = (id) => document.getElementById(id);
   const hideEl = (id) => { const el = getEl(id); if(el) el.classList.add('hidden'); };
   const showEl = (id) => { const el = getEl(id); if(el) el.classList.remove('hidden'); };
@@ -703,10 +709,9 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   
-  // ใช้ Root Path ถ้าไม่ได้อยู่ในระบบ Canvas เพื่อให้ชัวร์ว่าลงฐานข้อมูลแน่ๆ
-  const isExternal = typeof __app_id === 'undefined';
-  const getCol = (name) => isExternal ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
-  const getDocRef = (colName, docId) => isExternal ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+  // ยึดกฎ Firebase 100% สำหรับการทำงานบนเซิร์ฟเวอร์
+  const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+  const getDocRef = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
   window.appState = {
     currentUser: null,
@@ -774,16 +779,6 @@
     }
   };
 
-  const ensureAuth = async () => {
-    if (auth.currentUser) return true;
-    return new Promise(resolve => {
-      const unsub = onAuthStateChanged(auth, user => {
-        if (user) { unsub(); resolve(true); }
-      });
-      setTimeout(() => { unsub(); resolve(!!auth.currentUser); }, 5000);
-    });
-  };
-
   const initApp = async () => {
     try {
       const savedUserStr = localStorage.getItem('goldAppUser');
@@ -795,41 +790,38 @@
     updateSettingsUI();
     routeUser(); 
 
-    onAuthStateChanged(auth, (user) => {
-      if (user && !isListenersSetup) {
-        isListenersSetup = true;
-        setupListeners();
-      }
-    });
-
     try {
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
       } else {
         await signInAnonymously(auth);
       }
+      // รัน listener ทันทีที่ Auth ผ่าน เพื่อดึงข้อมูลลูกค้าขึ้นแอดมิน
+      setupListeners();
     } catch (e) {
-      console.warn("Offline Mode");
-      showToast("คำเตือน: ไม่สามารถเชื่อมต่อฐานข้อมูลได้ (โปรดเช็ค Firebase Auth)", true);
+      console.error("Firebase Auth Error:", e);
+      showToast("คำเตือน: โหมดออฟไลน์ การเชื่อมต่อฐานข้อมูลล้มเหลว", true);
     }
 
     setInterval(() => checkAndRunBackup(), 3600000);
   };
 
   const setupListeners = () => {
+    if(!auth.currentUser) return;
+    
     onSnapshot(getDocRef('settings', 'global'), (doc) => {
       if(doc.exists()) {
         window.appState.settings = {...window.appState.settings, ...doc.data()};
         try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
         updateSettingsUI();
       }
-    });
+    }, (err) => console.error("Settings Sync Error:", err));
 
     onSnapshot(getCol('appUsers'), (snap) => {
-      // Self-Healing System (ดึงข้อมูลกลับหาก Firebase หาย)
+      // ระบบ Self-Healing ฟื้นฟูข้อมูลจาก Local ขึ้น Cloud ป้องกันลูกค้าหาย
       if(snap.empty && window.appState.users && window.appState.users.length > 0) {
-         window.appState.users.forEach(u => {
-            setDoc(getDocRef('appUsers', u.id), u).catch(e => console.error(e));
+         window.appState.users.forEach(async (u) => {
+            try { await setDoc(getDocRef('appUsers', u.id), u); } catch(e) {}
          });
       } else if (!snap.empty) {
          window.appState.users = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -846,12 +838,12 @@
       }
       renderAdminUsers();
       updateDashboardStats();
-    });
+    }, (err) => console.error("Users Sync Error:", err));
 
     onSnapshot(getCol('transactions'), (snap) => {
       if(snap.empty && window.appState.transactions && window.appState.transactions.length > 0) {
-         window.appState.transactions.forEach(t => {
-            setDoc(getDocRef('transactions', t.id), t).catch(e => console.error(e));
+         window.appState.transactions.forEach(async (t) => {
+            try { await setDoc(getDocRef('transactions', t.id), t); } catch(e) {}
          });
       } else if (!snap.empty) {
          window.appState.transactions = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.date - a.date);
@@ -861,7 +853,7 @@
       renderCustomerHistory();
       renderAdminTransactions();
       updateDashboardStats();
-    });
+    }, (err) => console.error("Transactions Sync Error:", err));
   };
 
   window.switchAuthTab = (tab) => {
@@ -883,7 +875,6 @@
     }
   };
 
-  // Switch to Customer View
   window.switchToCustomerView = () => {
     hideEl('page-admin');
     showEl('page-customer');
@@ -891,7 +882,6 @@
     navCust('home');
   };
 
-  // Switch to Admin View
   window.switchToAdminView = () => {
     hideEl('page-customer');
     showEl('page-admin');
@@ -955,12 +945,18 @@
 
     showLoading(true);
     let role = 'customer';
-    const isAuthed = await ensureAuth();
+    
+    // Auth Check
+    if(!auth.currentUser) {
+       showToast("ขาดการเชื่อมต่อฐานข้อมูล โปรดลองใหม่", true);
+       showLoading(false);
+       return;
+    }
     
     if(secret === '9999' && !window.appState.settings.hasSuperAdmin) {
       role = 'superadmin';
       window.appState.settings.hasSuperAdmin = true;
-      if(isAuthed) setDoc(getDocRef('settings', 'global'), { hasSuperAdmin: true }, { merge: true }).catch(()=>{});
+      try { await setDoc(getDocRef('settings', 'global'), { hasSuperAdmin: true }, { merge: true }); } catch(e) {}
     } else if (secret === '9999') {
       showToast("รหัสลับถูกใช้ไปแล้ว ไม่สามารถเป็น Super Admin ได้อีก", true);
       showLoading(false);
@@ -970,21 +966,25 @@
     const docId = genId();
     const newUser = { id: docId, phone: phone, password: pass, name: name, role: role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
-    // ยืนยันการเซฟลง Firebase
-    if(isAuthed) {
-      await setDoc(getDocRef('appUsers', docId), newUser).catch(e => console.error(e));
-    }
-    
-    window.appState.users.push(newUser);
     try {
-       localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
-       localStorage.setItem('goldAppUser', JSON.stringify(newUser));
-    } catch(e){}
-    window.appState.currentUser = newUser;
-    
-    showToast("สมัครสมาชิกสำเร็จ!");
-    routeUser();
-    setTimeout(() => { showLoading(false); }, 200);
+      // บังคับเซฟลง Firebase ถ้าพังให้แจ้งเตือน
+      await setDoc(getDocRef('appUsers', docId), newUser);
+      
+      window.appState.users.push(newUser);
+      try {
+         localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
+         localStorage.setItem('goldAppUser', JSON.stringify(newUser));
+      } catch(e){}
+      window.appState.currentUser = newUser;
+      
+      showToast("สมัครสมาชิกสำเร็จ!");
+      routeUser();
+    } catch (err) {
+      console.error("Firebase Write Error:", err);
+      showToast("สมัครไม่สำเร็จ: ฐานข้อมูลไม่อนุญาต (โปรดเช็ค Firebase Rules)", true);
+    } finally {
+      showLoading(false);
+    }
   };
 
   window.handleLogin = () => {
@@ -1044,6 +1044,7 @@
     const picInput = getEl('edit-profile-pic');
     
     showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     let updateData = { name: name, email: email };
     if(picInput && picInput.dataset && picInput.dataset.base64) {
@@ -1053,26 +1054,33 @@
     
     window.appState.currentUser.name = name;
     window.appState.currentUser.email = email;
-    const isAuthed = await ensureAuth();
-    if(isAuthed) await updateDoc(getDocRef('appUsers', window.appState.currentUser.id), updateData).catch(e => console.error(e));
     
-    showToast("บันทึกโปรไฟล์สำเร็จ");
-    updateProfileUI();
-    setTimeout(() => { showLoading(false); }, 200);
+    try {
+       await updateDoc(getDocRef('appUsers', window.appState.currentUser.id), updateData);
+       showToast("บันทึกโปรไฟล์สำเร็จ");
+       updateProfileUI();
+    } catch(e) {
+       console.error(e);
+       showToast("บันทึกไม่สำเร็จ (ตรวจสอบสิทธิ์ Firebase)", true);
+    }
+    showLoading(false);
   };
 
   window.updatePassword = async () => {
     const pass = getVal('edit-pass');
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
     showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     window.appState.currentUser.password = pass;
-    const isAuthed = await ensureAuth();
-    if(isAuthed) await updateDoc(getDocRef('appUsers', window.appState.currentUser.id), { password: pass }).catch(e => console.error(e));
-    
-    showToast("เปลี่ยนรหัสผ่านสำเร็จ");
-    setVal('edit-pass', '');
-    setTimeout(() => { showLoading(false); }, 200);
+    try {
+       await updateDoc(getDocRef('appUsers', window.appState.currentUser.id), { password: pass });
+       showToast("เปลี่ยนรหัสผ่านสำเร็จ");
+       setVal('edit-pass', '');
+    } catch(e) {
+       showToast("บันทึกไม่สำเร็จ", true);
+    }
+    showLoading(false);
   };
 
   window.navCust = (tab) => {
@@ -1096,6 +1104,8 @@
     if(!slipBase64) return showToast("กรุณาแนบสลิปโอนเงิน", true);
 
     showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+
     const tx = {
       id: genId(), 
       userId: window.appState.currentUser ? window.appState.currentUser.id : '', 
@@ -1108,26 +1118,28 @@
       date: Date.now()
     };
     
-    const isAuthed = await ensureAuth();
-    if(isAuthed) await setDoc(getDocRef('transactions', tx.id), tx).catch(e => console.error(e));
-    
-    window.appState.transactions.unshift(tx);
-    try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
-    
-    sendTgMsg(`📥 <b>แจ้งเตือนฝากออม</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nสถานะ: รอตรวจสอบ`);
-    
-    setVal('dep-amount', '');
-    setVal('dep-remark', '');
-    
-    const prev = getEl('dep-preview');
-    if(prev) prev.classList.add('hidden');
-    
-    if(slipInput) { slipInput.value = ''; slipInput.dataset.base64 = ''; }
-    
-    showToast("ส่งคำขอฝากออมสำเร็จ รอตรวจสอบ");
-    renderCustomerHistory();
-    navCust('history');
-    setTimeout(() => { showLoading(false); }, 200);
+    try {
+      await setDoc(getDocRef('transactions', tx.id), tx);
+      
+      window.appState.transactions.unshift(tx);
+      try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
+      
+      sendTgMsg(`📥 <b>แจ้งเตือนฝากออม</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nสถานะ: รอตรวจสอบ`);
+      
+      setVal('dep-amount', '');
+      setVal('dep-remark', '');
+      const prev = getEl('dep-preview');
+      if(prev) prev.classList.add('hidden');
+      if(slipInput) { slipInput.value = ''; slipInput.dataset.base64 = ''; }
+      
+      showToast("ส่งคำขอฝากออมสำเร็จ รอตรวจสอบ");
+      renderCustomerHistory();
+      navCust('history');
+    } catch(e) {
+      console.error(e);
+      showToast("ส่งคำขอไม่สำเร็จ (ระบบเชื่อมต่อขัดข้อง)", true);
+    }
+    showLoading(false);
   };
 
   window.submitWithdraw = async () => {
@@ -1140,6 +1152,8 @@
     if(amount > max) return showToast("ยอดเงินออมไม่เพียงพอ", true);
 
     showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+
     const tx = {
       id: genId(), 
       userId: window.appState.currentUser ? window.appState.currentUser.id : '', 
@@ -1151,21 +1165,25 @@
       date: Date.now()
     };
     
-    const isAuthed = await ensureAuth();
-    if(isAuthed) await setDoc(getDocRef('transactions', tx.id), tx).catch(e => console.error(e));
-    
-    window.appState.transactions.unshift(tx);
-    try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
-    
-    sendTgMsg(`📤 <b>แจ้งเตือนขอถอนเงิน/แลกทอง</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nหมายเหตุ: ${remark}\nสถานะ: รอตรวจสอบ`);
-    
-    setVal('wit-amount', '');
-    setVal('wit-remark', '');
-    
-    showToast("ส่งคำขอถอนสำเร็จ รอร้านยืนยัน");
-    renderCustomerHistory();
-    navCust('history');
-    setTimeout(() => { showLoading(false); }, 200);
+    try {
+      await setDoc(getDocRef('transactions', tx.id), tx);
+      
+      window.appState.transactions.unshift(tx);
+      try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
+      
+      sendTgMsg(`📤 <b>แจ้งเตือนขอถอนเงิน/แลกทอง</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nหมายเหตุ: ${remark}\nสถานะ: รอตรวจสอบ`);
+      
+      setVal('wit-amount', '');
+      setVal('wit-remark', '');
+      
+      showToast("ส่งคำขอถอนสำเร็จ รอร้านยืนยัน");
+      renderCustomerHistory();
+      navCust('history');
+    } catch(e) {
+      console.error(e);
+      showToast("ส่งคำขอไม่สำเร็จ (ระบบเชื่อมต่อขัดข้อง)", true);
+    }
+    showLoading(false);
   };
 
   const renderCustomerHistory = () => {
@@ -1353,6 +1371,7 @@
   window.changeRole = async (uid, newRole) => {
     if(confirm(`ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้เป็น ${newRole} ใช่หรือไม่?`)) {
       showLoading(true);
+      if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
       
       let targetUser = null;
       for(let i=0; i<window.appState.users.length; i++){
@@ -1360,12 +1379,16 @@
       }
       
       if(targetUser) targetUser.role = newRole;
-      const isAuthed = await ensureAuth();
-      if(isAuthed) await updateDoc(getDocRef('appUsers', uid), { role: newRole });
       
-      renderAdminUsers();
-      showToast("เปลี่ยนสิทธิ์สำเร็จ");
-      setTimeout(() => { showLoading(false); }, 200);
+      try {
+         await updateDoc(getDocRef('appUsers', uid), { role: newRole });
+         renderAdminUsers();
+         showToast("เปลี่ยนสิทธิ์สำเร็จ");
+      } catch(e) {
+         console.error(e);
+         showToast("เปลี่ยนสิทธิ์ไม่สำเร็จ", true);
+      }
+      showLoading(false);
     }
   };
 
@@ -1411,6 +1434,7 @@
 
   const processTx = async (txId, status, overrideAmount = null, rejectReason = "") => {
     showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     let tx = null;
     if(window.appState.transactions) {
@@ -1430,79 +1454,89 @@
 
     let finalAmount = overrideAmount !== null ? overrideAmount : (tx.amount ? tx.amount : 0);
 
-    const isAuthed = await ensureAuth();
-
-    if(status === 'approved' && user) {
-      let newBalance = user.balance ? user.balance : 0;
-      if(tx.type === 'deposit') newBalance += finalAmount;
-      else if(tx.type === 'withdraw') {
-        if(finalAmount > newBalance) {
-          showToast("ลูกค้ามียอดไม่พอให้หัก", true);
-          showLoading(false);
-          return;
-        }
-        newBalance -= finalAmount;
-      }
-      user.balance = newBalance;
-      if(isAuthed) await updateDoc(getDocRef('appUsers', user.id), { balance: newBalance }).catch(e => console.error(e));
-    }
-
-    tx.status = status;
-    let updateData = { status: status };
-    if(overrideAmount !== null) { tx.amount = overrideAmount; updateData.amount = overrideAmount; }
-    if(rejectReason) {
-      const rm = tx.remark ? tx.remark : '';
-      tx.remark = rm + ` [ปฏิเสธ: ${rejectReason}]`;
-      updateData.remark = tx.remark;
-    }
-
-    if(isAuthed) await updateDoc(getDocRef('transactions', txId), updateData).catch(e => console.error(e));
-    
     try {
-      localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
-      localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
-    } catch(e){}
-    
-    renderAdminTransactions();
-    renderAdminUsers();
-    updateDashboardStats();
-    
-    let statTh = status==='approved'?'✅ อนุมัติสำเร็จ':'❌ ถูกปฏิเสธ';
-    sendTgMsg(`อัปเดตสถานะธุรกรรม\nผู้ใช้: ${tx.userName}\nประเภท: ${tx.type==='deposit'?'ฝาก':'ถอน'}\nยอด: ฿${finalAmount.toLocaleString()}\nสถานะ: ${statTh}`);
-    
-    showToast("ดำเนินการสำเร็จ");
-    setTimeout(() => { showLoading(false); }, 200);
+      if(status === 'approved' && user) {
+        let newBalance = user.balance ? user.balance : 0;
+        if(tx.type === 'deposit') newBalance += finalAmount;
+        else if(tx.type === 'withdraw') {
+          if(finalAmount > newBalance) {
+            showToast("ลูกค้ามียอดไม่พอให้หัก", true);
+            showLoading(false);
+            return;
+          }
+          newBalance -= finalAmount;
+        }
+        user.balance = newBalance;
+        await updateDoc(getDocRef('appUsers', user.id), { balance: newBalance });
+      }
+
+      tx.status = status;
+      let updateData = { status: status };
+      if(overrideAmount !== null) { tx.amount = overrideAmount; updateData.amount = overrideAmount; }
+      if(rejectReason) {
+        const rm = tx.remark ? tx.remark : '';
+        tx.remark = rm + ` [ปฏิเสธ: ${rejectReason}]`;
+        updateData.remark = tx.remark;
+      }
+
+      await updateDoc(getDocRef('transactions', txId), updateData);
+      
+      try {
+        localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
+        localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions));
+      } catch(e){}
+      
+      renderAdminTransactions();
+      renderAdminUsers();
+      updateDashboardStats();
+      
+      let statTh = status==='approved'?'✅ อนุมัติสำเร็จ':'❌ ถูกปฏิเสธ';
+      sendTgMsg(`อัปเดตสถานะธุรกรรม\nผู้ใช้: ${tx.userName}\nประเภท: ${tx.type==='deposit'?'ฝาก':'ถอน'}\nยอด: ฿${finalAmount.toLocaleString()}\nสถานะ: ${statTh}`);
+      
+      showToast("ดำเนินการสำเร็จ");
+    } catch(e) {
+      console.error(e);
+      showToast("ดำเนินการไม่สำเร็จ (ตรวจสอบสิทธิ์ Firebase)", true);
+    }
+    showLoading(false);
   };
 
   const updateSettingsUI = () => {
     const s = window.appState.settings;
     
-    const sName = s.shopName ? s.shopName : 'ร้านออมทอง';
+    const sName = s.shopName ? s.shopName : 'พรีเมียมออมทอง';
     setText('cust-header-name', sName);
     setText('admin-shop-name', sName);
     setText('admin-shop-name-sidebar', sName);
+    setText('login-shop-name', sName); // เปลี่ยนชื่อที่หน้าลงทะเบียน
     
     setText('cust-bank-name', s.bankName ? s.bankName : '-');
     setText('cust-bank-accname', s.bankAccName ? s.bankAccName : '-');
     setText('cust-bank-accno', s.bankAccNo ? s.bankAccNo : '-');
     
-    // อัปเดตส่วนติดต่อ Line ID และปุ่มลิงก์เพิ่มเพื่อน ให้กดง่ายๆ แบบที่คุณขอมา
+    // เปลี่ยนลิงก์และ ID ในหน้าถอน
     const lineIdVal = s.lineId ? s.lineId : '';
     const lineLinkVal = s.lineLink ? s.lineLink : '';
     const phoneVal = s.phone ? s.phone : '';
     
     let contactHtml = '';
     if (phoneVal) contactHtml += `<div style="margin-bottom:8px;">📞 โทร: <a href="tel:${phoneVal}" style="color:var(--gold-dark); text-decoration:none; font-weight:700;">${phoneVal}</a></div>`;
-    if (lineIdVal) contactHtml += `<div style="margin-bottom:12px;">💬 Line ID: <span style="color:var(--gold-dark); font-weight:700;">${lineIdVal}</span></div>`;
+    if (lineIdVal) contactHtml += `<div>💬 Line ID: <span style="color:var(--gold-dark); font-weight:700;">${lineIdVal}</span></div>`;
     
-    if (lineLinkVal) {
-       let safeLink = lineLinkVal.startsWith('http') ? lineLinkVal : `https://${lineLinkVal}`;
-       contactHtml += `<a href="${safeLink}" target="_blank" class="btn btn-success" style="display:inline-flex; width:100%; text-decoration:none; padding:12px 16px; font-size:15px; margin-top:8px;">✅ เพิ่มเพื่อน Line ติดต่อร้าน</a>`;
+    const elDetails = getEl('cust-shop-contact-details');
+    if (elDetails) elDetails.innerHTML = contactHtml ? contactHtml : '-';
+    
+    const elBtn = getEl('cust-shop-contact-btn');
+    if (elBtn) {
+        if (lineLinkVal) {
+            let safeLink = lineLinkVal.startsWith('http') ? lineLinkVal : `https://${lineLinkVal}`;
+            elBtn.innerHTML = `<a href="${safeLink}" target="_blank" class="btn btn-success" style="display:inline-flex; width:100%; text-decoration:none; padding:12px 16px; font-size:15px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">✅ คลิกเพิ่มเพื่อน Line ติดต่อร้าน</a>`;
+        } else {
+            elBtn.innerHTML = '';
+        }
     }
     
-    const elCont = getEl('cust-shop-contact');
-    if(elCont) elCont.innerHTML = contactHtml ? contactHtml : '-';
-    
+    // โลโก้ในแอพและหน้าลงทะเบียน
     if(s.shopLogoBase64) {
       const lg = getEl('cust-header-logo');
       if(lg) { lg.src = s.shopLogoBase64; lg.style.display = 'block'; }
@@ -1510,6 +1544,11 @@
       if(lfb) lfb.style.display = 'none';
       const lp = getEl('set-logo-preview');
       if(lp) { lp.src = s.shopLogoBase64; lp.classList.remove('hidden'); }
+      
+      const logImg = getEl('login-logo-img');
+      if(logImg) { logImg.src = s.shopLogoBase64; logImg.style.display = 'block'; }
+      const logFb = getEl('login-logo-fallback');
+      if(logFb) logFb.style.display = 'none';
     }
 
     if(s.qrBase64) {
@@ -1528,11 +1567,12 @@
     setVal('set-bankname', s.bankName ? s.bankName : '');
     setVal('set-bankaccname', s.bankAccName ? s.bankAccName : '');
     setVal('set-bankaccno', s.bankAccNo ? s.bankAccNo : '');
-    // Bot token remains fixed, input is ignored on save
   };
 
   window.saveSettings = async () => {
     showLoading(true);
+    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    
     const newData = {
       shopName: getVal('set-shopname'),
       phone: getVal('set-phone'),
@@ -1555,11 +1595,14 @@
     try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
     updateSettingsUI();
 
-    const isAuthed = await ensureAuth();
-    if(isAuthed) await setDoc(getDocRef('settings', 'global'), newData, {merge:true}).catch(e => console.error(e));
-    
-    showToast("บันทึกการตั้งค่าสำเร็จ");
-    setTimeout(() => { showLoading(false); }, 200);
+    try {
+      await setDoc(getDocRef('settings', 'global'), newData, {merge:true});
+      showToast("บันทึกการตั้งค่าสำเร็จ");
+    } catch(e) {
+      console.error(e);
+      showToast("บันทึกไม่สำเร็จ (ตรวจสิทธิ์ Firebase)", true);
+    }
+    showLoading(false);
   };
 
   const sendTgMsg = async (text) => {
