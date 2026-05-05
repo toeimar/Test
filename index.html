@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -437,9 +438,8 @@
 
 
 <script type="module">
-  // ดึง SDK รุ่น 11.6.1 ตามมาตรฐานใหม่ล่าสุดเพื่อไม่ให้ถูกบล็อกการทำงาน
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // Configuration
@@ -472,6 +472,7 @@
   };
 
   let pendingTxId = null;
+  let isListenersSetup = false;
 
   // Utilities
   window.showToast = (msg, isError = false) => {
@@ -511,33 +512,51 @@
     }
   };
 
-  // Safe Firebase Execution Guard
-  const safeSetDoc = async (ref, data, options = {}) => {
-    if (!auth.currentUser) return;
-    try { await setDoc(ref, data, options); } catch(e){}
+  // Safe Guard: รอให้ Auth พร้อมก่อนเขียนข้อมูลเสมอ เพื่อไม่ให้ข้อมูลหาย
+  const ensureAuth = async () => {
+    if (auth.currentUser) return true;
+    return new Promise(resolve => {
+      const unsub = onAuthStateChanged(auth, user => {
+        if (user) { unsub(); resolve(true); }
+      });
+      setTimeout(() => { unsub(); resolve(!!auth.currentUser); }, 5000);
+    });
   };
+
+  const safeSetDoc = async (ref, data, options = {}) => {
+    const authed = await ensureAuth();
+    if (!authed) return;
+    try { await setDoc(ref, data, options); } catch(e){ console.error(e); }
+  };
+
   const safeUpdateDoc = async (ref, data) => {
-    if (!auth.currentUser) return;
-    try { await updateDoc(ref, data); } catch(e){}
+    const authed = await ensureAuth();
+    if (!authed) return;
+    try { await updateDoc(ref, data); } catch(e){ console.error(e); }
   };
 
   // Init System (No Blocking)
   const initApp = async () => {
-    // 1. Load Local
     const savedUser = localStorage.getItem('goldAppUser');
     if (savedUser) window.appState.currentUser = JSON.parse(savedUser);
     
     updateSettingsUI();
     routeUser(); 
 
-    // 2. Load Firebase safely
+    // Listeners จะทำงานต่อเมื่อ Firebase ยืนยันตัวตนผ่านแล้วเท่านั้น
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isListenersSetup) {
+        isListenersSetup = true;
+        setupListeners();
+      }
+    });
+
     try {
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
       } else {
         await signInAnonymously(auth);
       }
-      setupListeners();
     } catch (e) {
       console.warn("Offline or Connection Error, continuing in local mode");
     }
@@ -649,6 +668,7 @@
     const docId = genId();
     const newUser = { id: docId, phone, password: pass, name, role, email: '', balance: 0, createdAt: Date.now() };
     
+    // บันทึกแบบรับประกันการส่งข้อมูลเข้าเซิร์ฟเวอร์
     safeSetDoc(getDocRef('appUsers', docId), newUser);
     
     window.appState.users.push(newUser);
