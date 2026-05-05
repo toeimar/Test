@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -49,7 +50,7 @@
   .mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
   .text-center { text-align: center; }
   
-  /* Buttons */
+  /* Buttons - Touch Friendly */
   .btn { 
     padding: 14px 20px; 
     border-radius: 14px; 
@@ -239,7 +240,7 @@
     overflow: hidden; 
   }
   .balance-card::after { content: '✨'; position: absolute; right: -10px; top: -10px; font-size: 100px; opacity: 0.1; }
-  .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: nowrap; }
+  .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: nowrap; line-height: 1.5; }
 
   /* --- MOBILE RESPONSIVE OVERRIDES (รองรับ iPad & Mobile) --- */
   @media (max-width: 1024px) {
@@ -606,6 +607,7 @@
         <div class="form-group"><label>ชื่อร้าน</label><input type="text" id="set-shopname" class="form-control"></div>
         <div class="form-group"><label>เบอร์โทรติดต่อ</label><input type="text" id="set-phone" class="form-control"></div>
         
+        <!-- แยกไอดีและลิงก์ไลน์ ตามที่รีเควส -->
         <div class="form-group"><label>Line ID (ไอดีไลน์)</label><input type="text" id="set-line-id" class="form-control" placeholder="เช่น @goldshop"></div>
         <div class="form-group"><label>ลิงก์เพิ่มเพื่อน Line (URL)</label><input type="text" id="set-line-link" class="form-control" placeholder="เช่น https://line.me/ti/p/..."></div>
         
@@ -680,6 +682,7 @@
   import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+  // System Helpers
   const getEl = (id) => document.getElementById(id);
   const hideEl = (id) => { const el = getEl(id); if(el) el.classList.add('hidden'); };
   const showEl = (id) => { const el = getEl(id); if(el) el.classList.remove('hidden'); };
@@ -708,7 +711,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   
-  // ยึดกฎ Firebase 100% สำหรับการทำงานบนเซิร์ฟเวอร์
   const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
   const getDocRef = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
@@ -731,7 +733,7 @@
     t.textContent = msg;
     t.style.background = isError ? "var(--red)" : "var(--black)";
     t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 3000);
+    setTimeout(() => { t.style.display = 'none'; }, 4000);
   };
   
   window.showLoading = (show) => {
@@ -778,6 +780,16 @@
     }
   };
 
+  const ensureAuth = async () => {
+    if (auth.currentUser) return true;
+    return new Promise(resolve => {
+      const unsub = onAuthStateChanged(auth, user => {
+        if (user) { unsub(); resolve(true); }
+      });
+      setTimeout(() => { unsub(); resolve(!!auth.currentUser); }, 5000);
+    });
+  };
+
   const initApp = async () => {
     try {
       const savedUserStr = localStorage.getItem('goldAppUser');
@@ -789,17 +801,22 @@
     updateSettingsUI();
     routeUser(); 
 
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isListenersSetup) {
+        isListenersSetup = true;
+        setupListeners();
+      }
+    });
+
     try {
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
       } else {
         await signInAnonymously(auth);
       }
-      // รัน listener ทันทีที่ Auth ผ่าน เพื่อดึงข้อมูลลูกค้าขึ้นแอดมิน
-      setupListeners();
     } catch (e) {
-      console.error("Firebase Auth Error:", e);
-      showToast("คำเตือน: โหมดออฟไลน์ การเชื่อมต่อฐานข้อมูลล้มเหลว", true);
+      console.warn("Offline Mode");
+      showToast("คำเตือน: ไม่สามารถเชื่อมต่อฐานข้อมูลได้ (โปรดเช็ค Firebase Auth)", true);
     }
 
     setInterval(() => checkAndRunBackup(), 3600000);
@@ -874,6 +891,7 @@
     }
   };
 
+  // Switch to Customer View
   window.switchToCustomerView = () => {
     hideEl('page-admin');
     showEl('page-customer');
@@ -881,6 +899,7 @@
     navCust('home');
   };
 
+  // Switch to Admin View
   window.switchToAdminView = () => {
     hideEl('page-customer');
     showEl('page-admin');
@@ -944,10 +963,11 @@
 
     showLoading(true);
     let role = 'customer';
+    const isAuthed = await ensureAuth();
     
-    // Auth Check
-    if(!auth.currentUser) {
-       showToast("ขาดการเชื่อมต่อฐานข้อมูล โปรดลองใหม่", true);
+    // Check Auth Before Saving
+    if(!isAuthed) {
+       showToast("ขาดการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง", true);
        showLoading(false);
        return;
     }
@@ -980,7 +1000,7 @@
       routeUser();
     } catch (err) {
       console.error("Firebase Write Error:", err);
-      showToast("สมัครไม่สำเร็จ: ฐานข้อมูลไม่อนุญาต (โปรดเช็ค Firebase Rules)", true);
+      showToast("สมัครไม่สำเร็จ: ฐานข้อมูลไม่อนุญาต (โปรดตั้งค่า Firebase)", true);
     } finally {
       showLoading(false);
     }
@@ -1043,7 +1063,8 @@
     const picInput = getEl('edit-profile-pic');
     
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     let updateData = { name: name, email: email };
     if(picInput && picInput.dataset && picInput.dataset.base64) {
@@ -1069,7 +1090,9 @@
     const pass = getVal('edit-pass');
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     window.appState.currentUser.password = pass;
     try {
@@ -1103,7 +1126,8 @@
     if(!slipBase64) return showToast("กรุณาแนบสลิปโอนเงิน", true);
 
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
 
     const tx = {
       id: genId(), 
@@ -1151,7 +1175,8 @@
     if(amount > max) return showToast("ยอดเงินออมไม่เพียงพอ", true);
 
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
 
     const tx = {
       id: genId(), 
@@ -1370,7 +1395,8 @@
   window.changeRole = async (uid, newRole) => {
     if(confirm(`ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้เป็น ${newRole} ใช่หรือไม่?`)) {
       showLoading(true);
-      if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+      const isAuthed = await ensureAuth();
+      if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
       
       let targetUser = null;
       for(let i=0; i<window.appState.users.length; i++){
@@ -1433,7 +1459,8 @@
 
   const processTx = async (txId, status, overrideAmount = null, rejectReason = "") => {
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     let tx = null;
     if(window.appState.transactions) {
@@ -1507,20 +1534,19 @@
     setText('cust-header-name', sName);
     setText('admin-shop-name', sName);
     setText('admin-shop-name-sidebar', sName);
-    setText('login-shop-name', sName); // เปลี่ยนชื่อที่หน้าลงทะเบียน
+    setText('login-shop-name', sName); 
     
     setText('cust-bank-name', s.bankName ? s.bankName : '-');
     setText('cust-bank-accname', s.bankAccName ? s.bankAccName : '-');
     setText('cust-bank-accno', s.bankAccNo ? s.bankAccNo : '-');
     
-    // เปลี่ยนลิงก์และ ID ในหน้าถอน
     const lineIdVal = s.lineId ? s.lineId : '';
     const lineLinkVal = s.lineLink ? s.lineLink : '';
     const phoneVal = s.phone ? s.phone : '';
     
     let contactHtml = '';
     if (phoneVal) contactHtml += `<div style="margin-bottom:8px;">📞 โทร: <a href="tel:${phoneVal}" style="color:var(--gold-dark); text-decoration:none; font-weight:700;">${phoneVal}</a></div>`;
-    if (lineIdVal) contactHtml += `<div>💬 Line ID: <span style="color:var(--gold-dark); font-weight:700;">${lineIdVal}</span></div>`;
+    if (lineIdVal) contactHtml += `<div style="margin-bottom:12px;">💬 Line ID: <span style="color:var(--gold-dark); font-weight:700;">${lineIdVal}</span></div>`;
     
     const elDetails = getEl('cust-shop-contact-details');
     if (elDetails) elDetails.innerHTML = contactHtml ? contactHtml : '-';
@@ -1535,7 +1561,6 @@
         }
     }
     
-    // โลโก้ในแอพและหน้าลงทะเบียน
     if(s.shopLogoBase64) {
       const lg = getEl('cust-header-logo');
       if(lg) { lg.src = s.shopLogoBase64; lg.style.display = 'block'; }
@@ -1570,7 +1595,8 @@
 
   window.saveSettings = async () => {
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
     
     const newData = {
       shopName: getVal('set-shopname'),
@@ -1580,7 +1606,7 @@
       bankName: getVal('set-bankname'),
       bankAccName: getVal('set-bankaccname'),
       bankAccNo: getVal('set-bankaccno'),
-      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw", // FIXED
+      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw", 
       tgChatId: getVal('set-tg-chatid')
     };
     
