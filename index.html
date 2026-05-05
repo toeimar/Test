@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -249,8 +250,7 @@
     .admin-layout { flex-direction: column; }
     .admin-sidebar { display: none !important; } 
     
-    /* เพิ่มพื้นที่ด้านล่างมากขึ้นบนมือถือ เพื่อไม่ให้ปุ่มโดนบัง */
-    .admin-content { margin-left: 0; padding: 16px; padding-bottom: 160px; max-width: 100%; }
+    .admin-content { margin-left: 0; padding: 16px; padding-bottom: 120px; max-width: 100%; }
     
     .admin-topbar { 
       position: sticky; 
@@ -402,7 +402,7 @@
           <div style="font-size: 12px; color: var(--gray);">ชื่อบัญชี</div>
           <div class="font-bold" id="cust-bank-accname" style="font-size: 15px; margin-bottom: 8px;">-</div>
           <div style="font-size: 12px; color: var(--gray);">เลขบัญชี</div>
-          <div class="font-bold" id="cust-bank-accno" style="font-size: 24px; color: var(--gold-dark); letter-spacing: 2px; font-family: 'Sarabun', sans-serif;">-</div>
+          <div class="font-bold serif" id="cust-bank-accno" style="font-size: 24px; color: var(--gold-dark); letter-spacing: 2px; font-family: 'Sarabun', sans-serif;">-</div>
         </div>
       </div>
       
@@ -439,11 +439,15 @@
         <label>หมายเหตุ</label>
         <input type="text" id="wit-remark" class="form-control" placeholder="เช่น ต้องการทองแท่ง / มารับหน้าร้าน">
       </div>
-      <div class="form-group" style="background: #FEF3C7; padding: 16px; border-radius: 16px; margin-top: 24px; text-align:center;">
-        <div id="cust-shop-contact" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.6;">
-          📞 โทร: - <br><br> 💬 Line: -
+      
+      <!-- Contact Box (Updated to include Clickable Buttons) -->
+      <div class="form-group" style="background: #FEF3C7; padding: 20px; border-radius: 16px; margin-top: 24px; text-align:center;">
+        <label style="color: #92400E; font-size: 14px; margin-bottom: 12px; display:block;">📞 ติดต่อร้านทองเพื่อยืนยันการถอน</label>
+        <div id="cust-shop-contact" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.8;">
+          <!-- Content will be injected here via JS -->
         </div>
       </div>
+      
       <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="submitWithdraw()">ส่งคำขอถอนเงินออม</button>
     </div>
   </div>
@@ -595,7 +599,10 @@
 
         <div class="form-group"><label>ชื่อร้าน</label><input type="text" id="set-shopname" class="form-control"></div>
         <div class="form-group"><label>เบอร์โทรติดต่อ</label><input type="text" id="set-phone" class="form-control"></div>
-        <div class="form-group"><label>Line ID / ลิงก์เพิ่มเพื่อน</label><input type="text" id="set-line" class="form-control" placeholder="ใส่ลิงก์เช่น https://line.me/ti/p/~id หรือใส่ไอดีเฉยๆ ก็ได้"></div>
+        
+        <!-- แยกไอดีและลิงก์ไลน์ ตามที่รีเควส -->
+        <div class="form-group"><label>Line ID (ไอดีไลน์)</label><input type="text" id="set-line-id" class="form-control" placeholder="เช่น @goldshop"></div>
+        <div class="form-group"><label>ลิงก์เพิ่มเพื่อน Line (URL)</label><input type="text" id="set-line-link" class="form-control" placeholder="เช่น https://line.me/ti/p/..."></div>
         
         <h4 class="mt-6 mb-4" style="color: var(--gold-dark); border-bottom: 1px solid #eee; padding-bottom: 8px;">บัญชีธนาคารรับฝากออม</h4>
         <div class="form-group"><label>ชื่อธนาคาร</label><input type="text" id="set-bankname" class="form-control"></div>
@@ -615,7 +622,6 @@
         </div>
         <div class="form-group"><label>Chat ID</label><input type="text" id="set-tg-chatid" class="form-control" value="-1003963635991"></div>
         
-        <!-- ปรับแต่งปุ่มให้เรียงตัวสวยงามและกดง่ายบนมือถือ -->
         <div class="grid gap-3 mt-6">
           <button class="btn btn-primary" style="width: 100%;" onclick="saveSettings()">💾 บันทึกตั้งค่า</button>
           <button class="btn btn-outline" style="width: 100%;" onclick="testTelegram()">ทดสอบแจ้งเตือน</button>
@@ -698,15 +704,17 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   
-  const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
-  const getDocRef = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+  // ใช้ Root Path ถ้าไม่ได้อยู่ในระบบ Canvas เพื่อให้ชัวร์ว่าลงฐานข้อมูลแน่ๆ
+  const isExternal = typeof __app_id === 'undefined';
+  const getCol = (name) => isExternal ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
+  const getDocRef = (colName, docId) => isExternal ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
   window.appState = {
     currentUser: null,
     users: safeParseJSON(localStorage.getItem('cache_users'), []),
     transactions: safeParseJSON(localStorage.getItem('cache_txs'), []),
     settings: safeParseJSON(localStorage.getItem('cache_settings'), {
-      shopName: 'ร้านทองพรีเมียม', phone: '', line: '', bankName: '', bankAccName: '', bankAccNo: '', qrBase64: '', shopLogoBase64: '', 
+      shopName: 'ร้านทองพรีเมียม', phone: '', lineId: '', lineLink: '', bankName: '', bankAccName: '', bankAccNo: '', qrBase64: '', shopLogoBase64: '', 
       tgToken: '8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw', tgChatId: '-1003963635991', hasSuperAdmin: false
     }),
   };
@@ -803,6 +811,7 @@
       }
     } catch (e) {
       console.warn("Offline Mode");
+      showToast("คำเตือน: ไม่สามารถเชื่อมต่อฐานข้อมูลได้ (โปรดเช็ค Firebase Auth)", true);
     }
 
     setInterval(() => checkAndRunBackup(), 3600000);
@@ -818,7 +827,7 @@
     });
 
     onSnapshot(getCol('appUsers'), (snap) => {
-      // Self-Healing System (ป้องกันข้อมูลลูกค้าหายตอน Firebase แครช)
+      // Self-Healing System (ดึงข้อมูลกลับหาก Firebase หาย)
       if(snap.empty && window.appState.users && window.appState.users.length > 0) {
          window.appState.users.forEach(u => {
             setDoc(getDocRef('appUsers', u.id), u).catch(e => console.error(e));
@@ -929,7 +938,7 @@
     routeUser();
   };
 
-  window.handleRegister = () => {
+  window.handleRegister = async () => {
     const name = getVal('reg-name').trim();
     const phone = getVal('reg-phone').trim();
     const pass = getVal('reg-pass');
@@ -947,11 +956,12 @@
 
     showLoading(true);
     let role = 'customer';
+    const isAuthed = await ensureAuth();
     
     if(secret === '9999' && !window.appState.settings.hasSuperAdmin) {
       role = 'superadmin';
       window.appState.settings.hasSuperAdmin = true;
-      setDoc(getDocRef('settings', 'global'), { hasSuperAdmin: true }, { merge: true }).catch(()=>{});
+      if(isAuthed) setDoc(getDocRef('settings', 'global'), { hasSuperAdmin: true }, { merge: true }).catch(()=>{});
     } else if (secret === '9999') {
       showToast("รหัสลับถูกใช้ไปแล้ว ไม่สามารถเป็น Super Admin ได้อีก", true);
       showLoading(false);
@@ -961,8 +971,10 @@
     const docId = genId();
     const newUser = { id: docId, phone: phone, password: pass, name: name, role: role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
-    // บังคับเซฟลง Firebase
-    setDoc(getDocRef('appUsers', docId), newUser).catch(e => console.error(e));
+    // ยืนยันการเซฟลง Firebase
+    if(isAuthed) {
+      await setDoc(getDocRef('appUsers', docId), newUser).catch(e => console.error(e));
+    }
     
     window.appState.users.push(newUser);
     try {
@@ -1027,7 +1039,7 @@
     }
   };
 
-  window.updateProfile = () => {
+  window.updateProfile = async () => {
     const name = getVal('edit-name');
     const email = getVal('edit-email');
     const picInput = getEl('edit-profile-pic');
@@ -1042,20 +1054,22 @@
     
     window.appState.currentUser.name = name;
     window.appState.currentUser.email = email;
-    updateDoc(getDocRef('appUsers', window.appState.currentUser.id), updateData).catch(e => console.error(e));
+    const isAuthed = await ensureAuth();
+    if(isAuthed) await updateDoc(getDocRef('appUsers', window.appState.currentUser.id), updateData).catch(e => console.error(e));
     
     showToast("บันทึกโปรไฟล์สำเร็จ");
     updateProfileUI();
     setTimeout(() => { showLoading(false); }, 200);
   };
 
-  window.updatePassword = () => {
+  window.updatePassword = async () => {
     const pass = getVal('edit-pass');
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
     showLoading(true);
     
     window.appState.currentUser.password = pass;
-    updateDoc(getDocRef('appUsers', window.appState.currentUser.id), { password: pass }).catch(e => console.error(e));
+    const isAuthed = await ensureAuth();
+    if(isAuthed) await updateDoc(getDocRef('appUsers', window.appState.currentUser.id), { password: pass }).catch(e => console.error(e));
     
     showToast("เปลี่ยนรหัสผ่านสำเร็จ");
     setVal('edit-pass', '');
@@ -1072,7 +1086,7 @@
     window.scrollTo(0, 0); 
   };
 
-  window.submitDeposit = () => {
+  window.submitDeposit = async () => {
     const amtEl = getEl('dep-amount');
     const amount = amtEl ? parseFloat(amtEl.value) : 0;
     const remark = getVal('dep-remark');
@@ -1095,7 +1109,9 @@
       date: Date.now()
     };
     
-    setDoc(getDocRef('transactions', tx.id), tx).catch(e => console.error(e));
+    const isAuthed = await ensureAuth();
+    if(isAuthed) await setDoc(getDocRef('transactions', tx.id), tx).catch(e => console.error(e));
+    
     window.appState.transactions.unshift(tx);
     try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
     
@@ -1115,7 +1131,7 @@
     setTimeout(() => { showLoading(false); }, 200);
   };
 
-  window.submitWithdraw = () => {
+  window.submitWithdraw = async () => {
     const amtEl = getEl('wit-amount');
     const amount = amtEl ? parseFloat(amtEl.value) : 0;
     const remark = getVal('wit-remark');
@@ -1136,7 +1152,9 @@
       date: Date.now()
     };
     
-    setDoc(getDocRef('transactions', tx.id), tx).catch(e => console.error(e));
+    const isAuthed = await ensureAuth();
+    if(isAuthed) await setDoc(getDocRef('transactions', tx.id), tx).catch(e => console.error(e));
+    
     window.appState.transactions.unshift(tx);
     try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
     
@@ -1333,7 +1351,7 @@
     });
   };
 
-  window.changeRole = (uid, newRole) => {
+  window.changeRole = async (uid, newRole) => {
     if(confirm(`ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้เป็น ${newRole} ใช่หรือไม่?`)) {
       showLoading(true);
       
@@ -1343,7 +1361,8 @@
       }
       
       if(targetUser) targetUser.role = newRole;
-      updateDoc(getDocRef('appUsers', uid), { role: newRole }).catch(e => console.error(e));
+      const isAuthed = await ensureAuth();
+      if(isAuthed) await updateDoc(getDocRef('appUsers', uid), { role: newRole });
       
       renderAdminUsers();
       showToast("เปลี่ยนสิทธิ์สำเร็จ");
@@ -1391,7 +1410,7 @@
     }
   };
 
-  const processTx = (txId, status, overrideAmount = null, rejectReason = "") => {
+  const processTx = async (txId, status, overrideAmount = null, rejectReason = "") => {
     showLoading(true);
     
     let tx = null;
@@ -1412,6 +1431,8 @@
 
     let finalAmount = overrideAmount !== null ? overrideAmount : (tx.amount ? tx.amount : 0);
 
+    const isAuthed = await ensureAuth();
+
     if(status === 'approved' && user) {
       let newBalance = user.balance ? user.balance : 0;
       if(tx.type === 'deposit') newBalance += finalAmount;
@@ -1424,7 +1445,7 @@
         newBalance -= finalAmount;
       }
       user.balance = newBalance;
-      updateDoc(getDocRef('appUsers', user.id), { balance: newBalance }).catch(e => console.error(e));
+      if(isAuthed) await updateDoc(getDocRef('appUsers', user.id), { balance: newBalance }).catch(e => console.error(e));
     }
 
     tx.status = status;
@@ -1436,7 +1457,7 @@
       updateData.remark = tx.remark;
     }
 
-    updateDoc(getDocRef('transactions', txId), updateData).catch(e => console.error(e));
+    if(isAuthed) await updateDoc(getDocRef('transactions', txId), updateData).catch(e => console.error(e));
     
     try {
       localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
@@ -1466,22 +1487,22 @@
     setText('cust-bank-accname', s.bankAccName ? s.bankAccName : '-');
     setText('cust-bank-accno', s.bankAccNo ? s.bankAccNo : '-');
     
-    // สร้างลิงก์สำหรับเพิ่มเพื่อน Line และ โทรออก
-    const lineVal = s.line ? s.line : '';
+    // อัปเดตส่วนติดต่อ Line ID และปุ่มลิงก์เพิ่มเพื่อน ให้กดง่ายๆ แบบที่คุณขอมา
+    const lineIdVal = s.lineId ? s.lineId : '';
+    const lineLinkVal = s.lineLink ? s.lineLink : '';
     const phoneVal = s.phone ? s.phone : '';
-    let lineHtml = '-';
-    let phoneHtml = '-';
     
-    if (lineVal) {
-       let lineLink = lineVal.startsWith('http') ? lineVal : `https://line.me/ti/p/~${lineVal}`;
-       lineHtml = `<a href="${lineLink}" target="_blank" style="color:var(--gold-dark); text-decoration:underline;">${lineVal} (คลิกเพื่อเพิ่มเพื่อน)</a>`;
-    }
-    if (phoneVal) {
-       phoneHtml = `<a href="tel:${phoneVal}" style="color:var(--gold-dark); text-decoration:underline;">${phoneVal}</a>`;
+    let contactHtml = '';
+    if (phoneVal) contactHtml += `<div style="margin-bottom:8px;">📞 โทร: <a href="tel:${phoneVal}" style="color:var(--gold-dark); text-decoration:none; font-weight:700;">${phoneVal}</a></div>`;
+    if (lineIdVal) contactHtml += `<div style="margin-bottom:12px;">💬 Line ID: <span style="color:var(--gold-dark); font-weight:700;">${lineIdVal}</span></div>`;
+    
+    if (lineLinkVal) {
+       let safeLink = lineLinkVal.startsWith('http') ? lineLinkVal : `https://${lineLinkVal}`;
+       contactHtml += `<a href="${safeLink}" target="_blank" class="btn btn-success" style="display:inline-flex; width:100%; text-decoration:none; padding:12px 16px; font-size:15px; margin-top:8px;">✅ เพิ่มเพื่อน Line ติดต่อร้าน</a>`;
     }
     
     const elCont = getEl('cust-shop-contact');
-    if(elCont) elCont.innerHTML = `📞 โทร: ${phoneHtml} <br><br> 💬 Line: ${lineHtml}`;
+    if(elCont) elCont.innerHTML = contactHtml ? contactHtml : '-';
     
     if(s.shopLogoBase64) {
       const lg = getEl('cust-header-logo');
@@ -1503,23 +1524,25 @@
 
     setVal('set-shopname', s.shopName ? s.shopName : '');
     setVal('set-phone', s.phone ? s.phone : '');
-    setVal('set-line', s.line ? s.line : '');
+    setVal('set-line-id', s.lineId ? s.lineId : '');
+    setVal('set-line-link', s.lineLink ? s.lineLink : '');
     setVal('set-bankname', s.bankName ? s.bankName : '');
     setVal('set-bankaccname', s.bankAccName ? s.bankAccName : '');
     setVal('set-bankaccno', s.bankAccNo ? s.bankAccNo : '');
-    setVal('set-tg-chatid', s.tgChatId ? s.tgChatId : '');
+    // Bot token remains fixed, input is ignored on save
   };
 
-  window.saveSettings = () => {
+  window.saveSettings = async () => {
     showLoading(true);
     const newData = {
       shopName: getVal('set-shopname'),
       phone: getVal('set-phone'),
-      line: getVal('set-line'),
+      lineId: getVal('set-line-id'),
+      lineLink: getVal('set-line-link'),
       bankName: getVal('set-bankname'),
       bankAccName: getVal('set-bankaccname'),
       bankAccNo: getVal('set-bankaccno'),
-      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw",
+      tgToken: "8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw", // FIXED
       tgChatId: getVal('set-tg-chatid')
     };
     
@@ -1533,7 +1556,8 @@
     try { localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings)); } catch(e){}
     updateSettingsUI();
 
-    setDoc(getDocRef('settings', 'global'), newData, {merge:true}).catch(e => console.error(e));
+    const isAuthed = await ensureAuth();
+    if(isAuthed) await setDoc(getDocRef('settings', 'global'), newData, {merge:true}).catch(e => console.error(e));
     
     showToast("บันทึกการตั้งค่าสำเร็จ");
     setTimeout(() => { showLoading(false); }, 200);
