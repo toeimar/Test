@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -49,7 +50,7 @@
   .mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
   .text-center { text-align: center; }
   
-  /* Buttons */
+  /* Buttons - Touch Friendly */
   .btn { 
     padding: 14px 20px; 
     border-radius: 14px; 
@@ -241,8 +242,8 @@
   .balance-card::after { content: '✨'; position: absolute; right: -10px; top: -10px; font-size: 100px; opacity: 0.1; }
   .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: normal; line-height: 1.5; max-width: 90%; }
 
-  /* --- RESPONSIVE OVERRIDES (บังคับ iPad & แท็บเล็ตทุกรุ่น ให้เป็นจอแอปพลิเคชัน) --- */
-  @media (max-width: 1200px) {
+  /* --- MOBILE & IPAD RESPONSIVE OVERRIDES (ขยายครอบคลุม 1366px สำหรับ iPad Pro) --- */
+  @media (max-width: 1366px) {
     .desktop-only { display: none !important; }
     .mobile-only { display: flex !important; } 
 
@@ -293,7 +294,7 @@
       if (loader && loader.style.display !== 'none') {
         loader.innerHTML = '<div style="background:white; padding:24px; border-radius:24px; color:#333; max-width:90%; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"><div style="font-size:50px; margin-bottom:10px;">⚠️</div><h3 style="color:#e74c3c; margin-bottom:10px; font-family:\'Sarabun\', sans-serif;">เกิดข้อผิดพลาดในการโหลด</h3><p style="font-size:15px; color:#666; font-family:\'Sarabun\', sans-serif;">หากคุณเห็นข้อความนี้แปลว่าระบบถูกบล็อก ให้อัปโหลดไฟล์นี้ขึ้นระบบเซิร์ฟเวอร์ (เช่น GitHub Pages) แล้วเข้าใช้งานผ่านลิงก์เว็บแทนการดับเบิลคลิกเปิดจากเครื่องครับ</p></div>';
       }
-    }, 5000);
+    }, 4000);
   });
 </script>
 
@@ -443,7 +444,7 @@
         <input type="text" id="wit-remark" class="form-control" placeholder="เช่น ต้องการทองแท่ง / มารับหน้าร้าน">
       </div>
       
-      <!-- ส่วนแยกไอดีและปุ่มลิงก์ไลน์ -->
+      <!-- แยกส่วนติดต่อร้าน -->
       <div class="form-group" style="background: #FEF3C7; padding: 20px; border-radius: 16px; margin-top: 24px; text-align:center;">
         <label style="color: #92400E; font-size: 14px; margin-bottom: 12px; display:block;">📞 ติดต่อร้านทองเพื่อยืนยันการถอน</label>
         <div id="cust-shop-contact-details" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.8; margin-bottom: 12px;">
@@ -508,7 +509,7 @@
 <div id="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
 <div id="page-admin" class="hidden admin-layout">
   
-  <!-- Sidebar for Desktop (> 1200px) -->
+  <!-- Sidebar for Desktop (> 1366px) -->
   <div class="admin-sidebar desktop-only" id="admin-sidebar">
     <div style="padding: calc(24px + env(safe-area-inset-top)) 24px 24px; border-bottom: 1px solid #E5E7EB;">
       <h2 class="serif" style="color: var(--gold-dark); font-size: 20px;">Admin Panel</h2>
@@ -527,7 +528,7 @@
   </div>
 
   <div class="admin-content" id="admin-content-area">
-    <!-- Topbar for iPad & Mobile (<= 1200px) -->
+    <!-- Topbar for iPad & Mobile (<= 1366px) -->
     <div class="admin-topbar mobile-only">
       <h2 class="serif" id="admin-page-title-mobile" style="font-size: 20px; margin: 0; color: var(--gold-dark);">ภาพรวมระบบ</h2>
       <button class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="logout()">ออกจากระบบ</button>
@@ -783,6 +784,16 @@
     }
   };
 
+  const ensureAuth = async () => {
+    if (auth.currentUser) return true;
+    return new Promise(resolve => {
+      const unsub = onAuthStateChanged(auth, user => {
+        if (user) { unsub(); resolve(true); }
+      });
+      setTimeout(() => { unsub(); resolve(!!auth.currentUser); }, 5000);
+    });
+  };
+
   const initApp = async () => {
     try {
       const savedUserStr = localStorage.getItem('goldAppUser');
@@ -952,8 +963,9 @@
 
     showLoading(true);
     
-    if(!auth.currentUser) {
-       showToast("⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่ในภายหลัง", true);
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) {
+       showToast("⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาไปแก้ Firebase", true);
        showLoading(false);
        return;
     }
@@ -963,7 +975,7 @@
     
     if(secret === '9999' && !s.hasSuperAdmin) {
       role = 'superadmin';
-      s.hasSuperAdmin = true;
+      window.appState.settings.hasSuperAdmin = true;
       try { await setDoc(getDocRef('settings', 'global'), { hasSuperAdmin: true }, { merge: true }); } catch(e) {}
     } else if (secret === '9999') {
       showToast("รหัสลับถูกใช้ไปแล้ว ไม่สามารถเป็น Super Admin ได้อีก", true);
@@ -975,7 +987,6 @@
     const newUser = { id: docId, phone: phone, password: pass, name: name, role: role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
     try {
-      // บังคับเซฟลง Firebase ให้สำเร็จก่อน ถึงจะไปต่อ เพื่อกันหน้าลูกค้าหายจากแอดมิน
       await setDoc(getDocRef('appUsers', docId), newUser);
       
       window.appState.users.push(newUser);
@@ -1052,7 +1063,8 @@
     const picInput = getEl('edit-profile-pic');
     
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ออฟไลน์: ไม่สามารถบันทึกขึ้นเซิร์ฟเวอร์", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ออฟไลน์: ไม่สามารถบันทึกขึ้นเซิร์ฟเวอร์", true); }
     
     let updateData = { name: name, email: email };
     if(picInput && picInput.dataset && picInput.dataset.base64) {
@@ -1079,7 +1091,8 @@
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
     
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("ออฟไลน์: ไม่สามารถเปลี่ยนรหัส", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("ออฟไลน์: ไม่สามารถเปลี่ยนรหัส", true); }
     
     window.appState.currentUser.password = pass;
     try {
@@ -1113,7 +1126,8 @@
     if(!slipBase64) return showToast("กรุณาแนบสลิปโอนเงิน", true);
 
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด ส่งข้อมูลไม่ได้", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด ส่งข้อมูลไม่ได้", true); }
 
     const tx = {
       id: genId(), 
@@ -1162,7 +1176,8 @@
     if(amount > max) return showToast("ยอดเงินออมไม่เพียงพอ", true);
 
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด", true); }
 
     const tx = {
       id: genId(), 
@@ -1446,7 +1461,8 @@
 
   const processTx = async (txId, status, overrideAmount = null, rejectReason = "") => {
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ขาดการเชื่อมต่อ ไม่สามารถจัดการข้อมูล", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("⚠️ ขาดการเชื่อมต่อ ไม่สามารถจัดการข้อมูล", true); }
     
     let tx = null;
     if(window.appState.transactions) {
@@ -1581,7 +1597,8 @@
 
   window.saveSettings = async () => {
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์: ไม่สามารถบันทึกตั้งค่าได้", true); }
+    const isAuthed = await ensureAuth();
+    if(!isAuthed) { showLoading(false); return showToast("⚠️ ออฟไลน์: ไม่สามารถบันทึกตั้งค่าได้", true); }
     
     const newData = {
       shopName: getVal('set-shopname'),
