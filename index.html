@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -241,8 +242,8 @@
   .balance-card::after { content: '✨'; position: absolute; right: -10px; top: -10px; font-size: 100px; opacity: 0.1; }
   .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: normal; line-height: 1.5; max-width: 90%; }
 
-  /* --- MOBILE RESPONSIVE OVERRIDES (รองรับ iPad & Mobile) --- */
-  @media (max-width: 1024px) {
+  /* --- RESPONSIVE OVERRIDES (บังคับ iPad & แท็บเล็ตทุกรุ่น ให้เป็นจอแอปพลิเคชัน) --- */
+  @media (max-width: 1200px) {
     .desktop-only { display: none !important; }
     .mobile-only { display: flex !important; } 
 
@@ -285,19 +286,31 @@
 </head>
 <body>
 
+<!-- Script ตรวจสอบการเปิดไฟล์ผิดวิธี -->
+<script>
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      var loader = document.getElementById('loading');
+      if (loader && loader.style.display !== 'none') {
+        loader.innerHTML = '<div style="background:white; padding:24px; border-radius:24px; color:#333; max-width:90%; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"><div style="font-size:50px; margin-bottom:10px;">⚠️</div><h3 style="color:#e74c3c; margin-bottom:10px; font-family:\'Sarabun\', sans-serif;">เกิดข้อผิดพลาดในการโหลด</h3><p style="font-size:15px; color:#666; font-family:\'Sarabun\', sans-serif;">หากคุณเห็นข้อความนี้แปลว่าระบบถูกบล็อก ให้อัปโหลดไฟล์นี้ขึ้นระบบเซิร์ฟเวอร์ (เช่น GitHub Pages) แล้วเข้าใช้งานผ่านลิงก์เว็บแทนการดับเบิลคลิกเปิดจากเครื่องครับ</p></div>';
+      }
+    }, 5000);
+  });
+</script>
+
 <!-- Toast Notification -->
 <div id="toast" class="toast"></div>
 
 <!-- Loading Overlay -->
 <div id="loading" class="modal-overlay" style="z-index: 9999; flex-direction: column; display: flex;">
   <div style="font-size: 48px; animation: spin 1s linear infinite;">⏳</div>
-  <div style="color: white; margin-top: 16px; font-weight: 600; letter-spacing: 1px;" id="loading-text">กำลังตรวจสอบข้อมูล...</div>
+  <div style="color: white; margin-top: 16px; font-weight: 600; letter-spacing: 1px;" id="loading-text">กำลังเชื่อมต่อระบบ...</div>
 </div>
 
 <!-- PAGE: LOGIN / REGISTER -->
 <div id="page-login" class="hidden">
   <div class="login-box">
-    <!-- โลโก้หน้าร้าน (ล็อกอิน) -->
+    <!-- โลโก้จะเปลี่ยนตามหน้าร้านอัตโนมัติ -->
     <div class="login-logo" id="login-logo-container">
       <img id="login-logo-img" src="" alt="โลโก้ร้าน" style="display:none; width: 100%; height: 100%; object-fit: cover;">
       <span id="login-logo-fallback">✨</span>
@@ -431,14 +444,14 @@
         <input type="text" id="wit-remark" class="form-control" placeholder="เช่น ต้องการทองแท่ง / มารับหน้าร้าน">
       </div>
       
-      <!-- แยกส่วนติดต่อร้าน -->
+      <!-- ส่วนแยกไอดีและปุ่มลิงก์ไลน์ -->
       <div class="form-group" style="background: #FEF3C7; padding: 20px; border-radius: 16px; margin-top: 24px; text-align:center;">
         <label style="color: #92400E; font-size: 14px; margin-bottom: 12px; display:block;">📞 ติดต่อร้านทองเพื่อยืนยันการถอน</label>
         <div id="cust-shop-contact-details" style="font-size: 15px; font-weight: 600; color: #92400E; line-height: 1.8; margin-bottom: 12px;">
           <!-- ข้อมูลเบอร์ และ ID จะถูกแทรกที่นี่ -->
         </div>
         <div id="cust-shop-contact-btn">
-          <!-- ปุ่มลิงก์เพิ่มเพื่อนจะถูกแทรกที่นี่ -->
+          <!-- ปุ่มลิงก์คลิกเพิ่มเพื่อนจะแทรกที่นี่ -->
         </div>
       </div>
       
@@ -496,7 +509,7 @@
 <div id="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
 <div id="page-admin" class="hidden admin-layout">
   
-  <!-- Sidebar for Desktop (> 1024px) -->
+  <!-- Sidebar for Desktop (> 1200px) -->
   <div class="admin-sidebar desktop-only" id="admin-sidebar">
     <div style="padding: calc(24px + env(safe-area-inset-top)) 24px 24px; border-bottom: 1px solid #E5E7EB;">
       <h2 class="serif" style="color: var(--gold-dark); font-size: 20px;">Admin Panel</h2>
@@ -515,7 +528,7 @@
   </div>
 
   <div class="admin-content" id="admin-content-area">
-    <!-- Topbar for iPad & Mobile (<= 1024px) -->
+    <!-- Topbar for iPad & Mobile (<= 1200px) -->
     <div class="admin-topbar mobile-only">
       <h2 class="serif" id="admin-page-title-mobile" style="font-size: 20px; margin: 0; color: var(--gold-dark);">ภาพรวมระบบ</h2>
       <button class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="logout()">ออกจากระบบ</button>
@@ -594,8 +607,9 @@
         <div class="form-group"><label>ชื่อร้าน</label><input type="text" id="set-shopname" class="form-control"></div>
         <div class="form-group"><label>เบอร์โทรติดต่อ</label><input type="text" id="set-phone" class="form-control"></div>
         
-        <div class="form-group"><label>Line ID (ไอดีไลน์)</label><input type="text" id="set-line-id" class="form-control" placeholder="เช่น @goldshop"></div>
-        <div class="form-group"><label>ลิงก์เพิ่มเพื่อน Line (URL)</label><input type="text" id="set-line-link" class="form-control" placeholder="เช่น https://line.me/ti/p/..."></div>
+        <!-- แยกไอดีและลิงก์ไลน์ ตามที่รีเควส -->
+        <div class="form-group"><label>Line ID (ไอดีไลน์ - แสดงเฉยๆ ไม่คลิก)</label><input type="text" id="set-line-id" class="form-control" placeholder="เช่น @goldshop"></div>
+        <div class="form-group"><label>ลิงก์เพิ่มเพื่อน Line (URL - สำหรับทำปุ่มคลิก)</label><input type="text" id="set-line-link" class="form-control" placeholder="เช่น https://line.me/ti/p/..."></div>
         
         <h4 class="mt-6 mb-4" style="color: var(--gold-dark); border-bottom: 1px solid #eee; padding-bottom: 8px;">บัญชีธนาคารรับฝากออม</h4>
         <div class="form-group"><label>ชื่อธนาคาร</label><input type="text" id="set-bankname" class="form-control"></div>
@@ -700,7 +714,6 @@
   const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
   const getDocRef = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
-  // Safeguard null arrays
   window.appState = {
     currentUser: null,
     users: safeParseJSON(localStorage.getItem('cache_users'), []) || [],
@@ -727,7 +740,6 @@
     const el = getEl('loading');
     if(el) {
        el.style.display = show ? 'flex' : 'none';
-       // Reset loading text
        const txt = getEl('loading-text');
        if(txt) txt.textContent = "กำลังเชื่อมต่อระบบ...";
     }
@@ -822,12 +834,7 @@
     });
 
     onSnapshot(getCol('appUsers'), (snap) => {
-      if(snap.empty && window.appState.users && window.appState.users.length > 0) {
-         // Self healing - push local users up if server is empty but we have local cache
-         window.appState.users.forEach(async (u) => {
-            try { await setDoc(getDocRef('appUsers', u.id), u); } catch(e) {}
-         });
-      } else if (!snap.empty) {
+      if (!snap.empty) {
          window.appState.users = snap.docs.map(d => ({id: d.id, ...d.data()}));
          try { localStorage.setItem('cache_users', JSON.stringify(window.appState.users)); } catch(e){}
       }
@@ -845,11 +852,7 @@
     }, (err) => console.error("Users Sync Error:", err));
 
     onSnapshot(getCol('transactions'), (snap) => {
-      if(snap.empty && window.appState.transactions && window.appState.transactions.length > 0) {
-         window.appState.transactions.forEach(async (t) => {
-            try { await setDoc(getDocRef('transactions', t.id), t); } catch(e) {}
-         });
-      } else if (!snap.empty) {
+      if (!snap.empty) {
          window.appState.transactions = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.date - a.date);
          try { localStorage.setItem('cache_txs', JSON.stringify(window.appState.transactions)); } catch(e){}
       }
@@ -910,6 +913,7 @@
 
     if(role === 'superadmin' || role === 'subadmin') {
       showEl('page-admin');
+      
       const navSet = getEl('nav-settings');
       if(navSet) navSet.classList.toggle('hidden', role !== 'superadmin');
       
@@ -950,7 +954,9 @@
     showLoading(true);
     
     if(!auth.currentUser) {
-       showToast("⚠️ กำลังทำงานในโหมดออฟไลน์ ข้อมูลจะไม่ขึ้นหน้าแอดมินจนกว่าเน็ตจะกลับมา", true);
+       showToast("⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่ในภายหลัง", true);
+       showLoading(false);
+       return;
     }
     
     let role = 'customer';
@@ -970,24 +976,21 @@
     const newUser = { id: docId, phone: phone, password: pass, name: name, role: role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
     try {
-      if(auth.currentUser) {
-         await setDoc(getDocRef('appUsers', docId), newUser);
-      }
+      // บังคับเซฟลง Firebase ให้สำเร็จก่อน ถึงจะไปต่อ เพื่อกันหน้าลูกค้าหายจากแอดมิน
+      await setDoc(getDocRef('appUsers', docId), newUser);
       
-      if(!window.appState.users) window.appState.users = [];
       window.appState.users.push(newUser);
-      
       try {
          localStorage.setItem('cache_users', JSON.stringify(window.appState.users));
          localStorage.setItem('goldAppUser', JSON.stringify(newUser));
       } catch(e){}
-      
       window.appState.currentUser = newUser;
+      
       showToast("สมัครสมาชิกสำเร็จ!");
       routeUser();
     } catch (err) {
       console.error("Firebase Write Error:", err);
-      showToast("❌ สมัครไม่สำเร็จ: ฐานข้อมูลล็อกอยู่ (โปรดไปเปิด Rules ใน Firebase)", true);
+      showToast("❌ สมัครไม่สำเร็จ: ฐานข้อมูลไม่อนุญาต (โปรดเช็คสิทธิ์ Firebase)", true);
     } finally {
       showLoading(false);
     }
@@ -1111,7 +1114,7 @@
     if(!slipBase64) return showToast("กรุณาแนบสลิปโอนเงิน", true);
 
     showLoading(true);
-    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด ส่งข้อมูลไปแอดมินไม่ได้", true); }
+    if(!auth.currentUser) { showLoading(false); return showToast("⚠️ ออฟไลน์โหมด ส่งข้อมูลไม่ได้", true); }
 
     const tx = {
       id: genId(), 
@@ -1380,7 +1383,8 @@
   window.changeRole = async (uid, newRole) => {
     if(confirm(`ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้เป็น ${newRole} ใช่หรือไม่?`)) {
       showLoading(true);
-      if(!auth.currentUser) { showLoading(false); return showToast("ออฟไลน์ไม่สามารถแก้ไขสิทธิ์", true); }
+      const isAuthed = await ensureAuth();
+      if(!isAuthed) { showLoading(false); return showToast("ไม่ได้เชื่อมต่อฐานข้อมูล", true); }
       
       let targetUser = null;
       for(let i=0; i<window.appState.users.length; i++){
