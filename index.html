@@ -1,8 +1,8 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<!-- บังคับไม่ให้ผู้ใช้ซูมหน้าจอได้ เพื่อความเป็น App-like -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ออมทองพรีเมียม - ระบบออมเงินเพื่อรับทอง</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,6 @@
     --radius: 16px;
   }
 
-  /* ปิดเอฟเฟกต์ highlight สีฟ้าเวลากดปุ่มบนมือถือ */
   * { 
     box-sizing: border-box; 
     margin: 0; 
@@ -37,7 +36,7 @@
     background: var(--bg-color); 
     color: var(--black); 
     overflow-x: hidden;
-    overscroll-behavior-y: none; /* กันจอยางยืดเวลาดึงสุดขอบ */
+    overscroll-behavior-y: none;
   }
   h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
   
@@ -53,7 +52,7 @@
   
   /* Buttons - Touch Friendly */
   .btn { 
-    padding: 14px 20px; /* เพิ่มพื้นที่สัมผัส */
+    padding: 14px 20px; 
     border-radius: 14px; 
     border: none; 
     font-weight: 600; 
@@ -68,7 +67,7 @@
     -webkit-user-select: none;
   }
   .btn-primary { background: var(--gold); color: white; box-shadow: 0 4px 12px rgba(212,175,55,0.3); }
-  .btn-primary:active { transform: scale(0.96); opacity: 0.9; } /* สัมผัสตอบสนองแบบแอป */
+  .btn-primary:active { transform: scale(0.96); opacity: 0.9; } 
   .btn-outline { background: white; border: 1.5px solid var(--gold); color: var(--gold); }
   .btn-outline:active { transform: scale(0.96); background: var(--gold-light); }
   .btn-danger { background: var(--red); color: white; }
@@ -77,7 +76,7 @@
   .btn-success:active { transform: scale(0.96); opacity: 0.9; }
   .btn-sm { padding: 10px 16px; font-size: 13px; border-radius: 10px; }
   
-  /* Inputs - Safe for iOS */
+  /* Inputs */
   .form-group { margin-bottom: 20px; text-align: left; }
   .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-dark); margin-bottom: 8px; }
   .form-control { 
@@ -85,7 +84,7 @@
     padding: 14px 16px; 
     border: 1.5px solid #E5E7EB; 
     border-radius: 14px; 
-    font-size: 16px; /* 16px ป้องกัน iPhone Auto-zoom */
+    font-size: 16px; 
     outline: none; 
     transition: 0.2s; 
     background: white; 
@@ -116,7 +115,7 @@
   .login-box { width: 100%; max-width: 400px; background: white; padding: 40px 30px; border-radius: 24px; box-shadow: var(--shadow-md); text-align: center; }
   .login-logo { width: 80px; height: 80px; background: var(--gold-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
   
-  /* Customer Layout - Mobile Optimized */
+  /* Customer Nav Elements */
   .app-header { 
     background: rgba(255,255,255,0.85); 
     backdrop-filter: blur(12px); 
@@ -132,7 +131,8 @@
   }
   .app-container { padding: 20px; padding-bottom: 140px; max-width: 600px; margin: 0 auto; }
   
-  .bottom-nav { 
+  /* Shared Bottom Nav Styles */
+  .bottom-nav, .admin-bottom-nav { 
     position: fixed; 
     bottom: 0; 
     left: 0; 
@@ -165,12 +165,18 @@
     border-radius: 12px;
     user-select: none;
     -webkit-user-select: none;
+    position: relative;
+    flex: 1;
   }
   .nav-item:active { transform: scale(0.9); background: rgba(0,0,0,0.03); }
   .nav-item.active { color: var(--gold); }
   .nav-icon { font-size: 24px; margin-bottom: 2px; }
 
-  /* Admin Layout (Desktop & Mobile) */
+  /* Device Specific Displays */
+  .desktop-only { display: block; }
+  .mobile-only { display: none !important; }
+
+  /* Admin Layout Base */
   .admin-layout { display: flex; min-height: 100vh; }
   .admin-sidebar { 
     width: 280px; 
@@ -181,7 +187,6 @@
     position: fixed; 
     height: 100vh; 
     z-index: 1001; 
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
   }
   .admin-content { flex: 1; margin-left: 280px; padding: 32px; max-width: 1200px; padding-bottom: 60px; }
   .admin-nav-item { 
@@ -198,14 +203,13 @@
   .admin-nav-item:active { background: var(--gray-light); }
   .admin-nav-item.active { background: var(--gold-light); color: var(--gold-dark); border-left-color: var(--gold); }
   
-  /* Tables - Smooth Touch Scroll */
+  /* Tables */
   .table-responsive { 
     overflow-x: auto; 
     -webkit-overflow-scrolling: touch; 
     width: 100%; 
-    padding-bottom: 10px; /* ให้พื้นที่เงาตอนเลื่อน */
+    padding-bottom: 10px; 
   }
-  /* ซ่อน Scrollbar ของตารางแต่ยังเลื่อนได้ */
   .table-responsive::-webkit-scrollbar { height: 6px; }
   .table-responsive::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 8px; }
   .table-responsive::-webkit-scrollbar-thumb { background: #ddd; border-radius: 8px; }
@@ -217,9 +221,10 @@
   
   /* Slips & Images */
   .img-preview { width: 100%; max-height: 250px; object-fit: contain; border-radius: 16px; border: 1px dashed var(--gray); margin-top: 10px; background: #f9f9f9; }
+  .avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-light); margin-top: 10px; }
   .qr-box { background: var(--gray-light); padding: 24px; border-radius: 20px; text-align: center; margin-bottom: 24px; }
   .qr-box img { max-width: 100%; height: auto; max-height: 250px; border-radius: 12px; margin-bottom: 12px; object-fit: contain; }
-
+  
   /* Utilities */
   .balance-card { 
     background: linear-gradient(135deg, var(--gold), var(--gold-dark)); 
@@ -235,22 +240,37 @@
   .balance-card::after { content: '✨'; position: absolute; right: -10px; top: -10px; font-size: 100px; opacity: 0.1; }
   .toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--black); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; display: none; box-shadow: var(--shadow-md); text-align: center; white-space: nowrap; }
 
-  /* Mobile Overrides (Responsive) */
-  .mobile-menu-btn { display: none; background: none; border: none; font-size: 28px; cursor: pointer; color: var(--black); padding: 4px; border-radius: 8px; }
-  .mobile-menu-btn:active { background: rgba(0,0,0,0.05); }
-  
-  #admin-sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  /* --- MOBILE RESPONSIVE OVERRIDES (รองรับ iPad & Mobile) --- */
+  @media (max-width: 1024px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: flex !important; } 
 
-  @media (max-width: 768px) {
-    .admin-sidebar { transform: translateX(-100%); width: 280px; box-shadow: var(--shadow-md); }
-    .admin-sidebar.open { transform: translateX(0); }
-    .admin-content { margin-left: 0; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); }
-    .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
+    .admin-layout { flex-direction: column; }
+    .admin-sidebar { display: none !important; } /* ซ่อนแถบด้านซ้าย */
+    .admin-content { margin-left: 0; padding: 16px; padding-bottom: 120px; max-width: 100%; }
     
-    .grid { grid-template-columns: 1fr; gap: 16px; } /* Stack cards on mobile */
+    /* Sticky Topbar สำหรับ Admin บนมือถือและแท็บเล็ต */
+    .admin-topbar { 
+      position: sticky; 
+      top: 0; 
+      background: rgba(255,255,255,0.95); 
+      backdrop-filter: blur(10px); 
+      -webkit-backdrop-filter: blur(10px); 
+      padding: calc(16px + env(safe-area-inset-top)) 20px 16px; 
+      margin: -16px -16px 20px -16px; 
+      z-index: 900; 
+      border-bottom: 1px solid rgba(0,0,0,0.05); 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .grid { grid-template-columns: 1fr 1fr; gap: 16px; } 
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; } 
+    }
     .card { padding: 16px; }
     
-    /* Make Transaction History Text wrap beautifully */
     .tx-item-history { flex-wrap: wrap; }
     .tx-amount-col { text-align: right; min-width: 90px; }
   }
@@ -327,7 +347,8 @@
 <div id="page-customer" class="hidden">
   <div class="app-header">
     <div class="flex items-center gap-3">
-      <div id="cust-header-logo" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight: bold; box-shadow: var(--shadow-sm);">ร้าน</div>
+      <img id="cust-header-logo" src="" alt="โลโก้" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); box-shadow: var(--shadow-sm); display: none;">
+      <div id="cust-header-logo-fallback" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight: bold; box-shadow: var(--shadow-sm);">ร้าน</div>
       <h3 class="serif" id="cust-header-name" style="font-size: 18px;">ร้านทองพรีเมียม</h3>
     </div>
     <button class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="logout()">ออกจากระบบ</button>
@@ -421,12 +442,18 @@
   <!-- Content: Profile -->
   <div class="app-container hidden" id="cust-content-profile">
     <div class="card text-center">
-      <div style="width: 72px; height: 72px; background: var(--gray-light); border-radius: 50%; display: flex; align-items:center; justify-content:center; font-size:32px; margin: 0 auto 16px;">👤</div>
+      <img id="pro-avatar-img" src="" alt="โปรไฟล์" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 16px; box-shadow: var(--shadow-sm); display: none;">
+      <div id="pro-avatar-fallback" style="width: 80px; height: 80px; background: var(--gray-light); border-radius: 50%; display: flex; align-items:center; justify-content:center; font-size:36px; margin: 0 auto 16px;">👤</div>
       <h3 class="serif" id="pro-name" style="font-size: 22px;">ชื่อ นามสกุล</h3>
       <div class="badge bg-gold mt-4" id="pro-role" style="padding: 6px 16px; font-size: 13px;">ลูกค้า</div>
     </div>
     <div class="card">
       <div class="card-title">ข้อมูลส่วนตัว</div>
+      <div class="form-group">
+        <label>อัปโหลดรูปโปรไฟล์ใหม่</label>
+        <input type="file" id="edit-profile-pic" class="form-control" accept="image/*" style="padding: 10px;" onchange="previewImage(this, 'profile-preview')">
+        <img id="profile-preview" class="avatar-preview hidden">
+      </div>
       <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="edit-name" class="form-control"></div>
       <div class="form-group"><label>เบอร์โทรศัพท์ (ใช้เข้าระบบ)</label><input type="text" id="edit-phone" class="form-control" disabled style="background: var(--gray-light); color: var(--gray);"></div>
       <div class="form-group"><label>อีเมล (เพิ่มเติม)</label><input type="email" id="edit-email" class="form-control"></div>
@@ -439,7 +466,7 @@
     </div>
   </div>
 
-  <!-- Bottom App Navigation -->
+  <!-- Bottom App Navigation (Customer) -->
   <div class="bottom-nav">
     <div class="nav-item active" onclick="navCust('home')"><span class="nav-icon">🏠</span>หน้าแรก</div>
     <div class="nav-item" onclick="navCust('deposit')"><span class="nav-icon">📥</span>ฝาก</div>
@@ -451,17 +478,15 @@
 
 
 <!-- PAGE: ADMIN APP -->
-<div id="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
 <div id="page-admin" class="hidden admin-layout">
-  <div class="admin-sidebar" id="admin-sidebar">
-    <div style="padding: calc(24px + env(safe-area-inset-top)) 24px 24px; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <h2 class="serif" style="color: var(--gold-dark); font-size: 20px;">Admin Panel</h2>
-        <div style="font-size: 13px; color: var(--gray); margin-top: 4px;" id="admin-shop-name">ร้านทองพรีเมียม</div>
-      </div>
-      <button class="mobile-menu-btn" onclick="toggleAdminSidebar()">✕</button>
+  
+  <!-- Sidebar for Desktop (> 1024px) -->
+  <div class="admin-sidebar desktop-only" id="admin-sidebar">
+    <div style="padding: calc(24px + env(safe-area-inset-top)) 24px 24px; border-bottom: 1px solid #E5E7EB;">
+      <h2 class="serif" style="color: var(--gold-dark); font-size: 20px;">Admin Panel</h2>
+      <div style="font-size: 13px; color: var(--gray); margin-top: 4px;" id="admin-shop-name-sidebar">ร้านทองพรีเมียม</div>
     </div>
-    <div style="padding: 16px 0; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+    <div style="padding: 16px 0; flex: 1; overflow-y: auto;">
       <div class="admin-nav-item active" onclick="navAdmin('dashboard')"><span style="font-size: 20px; width: 24px;">📊</span> ภาพรวม</div>
       <div class="admin-nav-item" onclick="navAdmin('transactions')"><span style="font-size: 20px; width: 24px;">📋</span> ธุรกรรม & อนุมัติ <span id="admin-badge-tx" class="badge bg-red hidden" style="margin-left:auto; font-size: 11px;">0</span></div>
       <div class="admin-nav-item" onclick="navAdmin('users')"><span style="font-size: 20px; width: 24px;">👥</span> จัดการลูกค้า</div>
@@ -474,8 +499,14 @@
   </div>
 
   <div class="admin-content" id="admin-content-area">
-    <div class="flex items-center gap-3 mb-4" style="margin-bottom: 24px;">
-      <button class="mobile-menu-btn" onclick="toggleAdminSidebar()">☰</button>
+    <!-- Topbar for iPad & Mobile (<= 1024px) -->
+    <div class="admin-topbar mobile-only">
+      <h2 class="serif" id="admin-page-title-mobile" style="font-size: 20px; margin: 0; color: var(--gold-dark);">ภาพรวมระบบ</h2>
+      <button class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 12px; padding: 6px 14px;" onclick="logout()">ออกจากระบบ</button>
+    </div>
+
+    <!-- Title for Desktop -->
+    <div class="flex items-center gap-3 mb-4 desktop-only" style="margin-bottom: 24px;">
       <h2 class="serif" id="admin-page-title" style="font-size: 22px;">ภาพรวมระบบ</h2>
     </div>
 
@@ -525,7 +556,7 @@
         <div class="table-responsive" style="padding: 0 20px 20px;">
           <table id="table-users">
             <thead>
-              <tr><th>ชื่อ-นามสกุล</th><th>เบอร์โทร</th><th>สิทธิ์</th><th>ยอดสะสม</th><th>จัดการ</th></tr>
+              <tr><th>โปรไฟล์</th><th>ชื่อ-นามสกุล</th><th>เบอร์โทร</th><th>สิทธิ์</th><th>ยอดสะสม</th><th>จัดการ</th></tr>
             </thead>
             <tbody></tbody>
           </table>
@@ -537,6 +568,13 @@
     <div id="admin-sec-settings" class="hidden">
       <div class="card" style="max-width: 600px;">
         <div class="card-title">ข้อมูลร้านค้า และ บัญชีรับโอน</div>
+        
+        <div class="form-group">
+          <label>อัปโหลดรูปร้านค้า (โลโก้)</label>
+          <input type="file" class="form-control" accept="image/*" style="padding: 10px;" id="set-shop-logo" onchange="previewImage(this, 'set-logo-preview')">
+          <img id="set-logo-preview" class="avatar-preview hidden">
+        </div>
+
         <div class="form-group"><label>ชื่อร้าน</label><input type="text" id="set-shopname" class="form-control"></div>
         <div class="form-group"><label>เบอร์โทรติดต่อ</label><input type="text" id="set-phone" class="form-control"></div>
         <div class="form-group"><label>Line ID / ลิงก์</label><input type="text" id="set-line" class="form-control"></div>
@@ -548,7 +586,7 @@
         
         <div class="form-group">
           <label>อัปโหลดรูป QR Code รับเงิน</label>
-          <input type="file" class="form-control" accept="image/*" style="padding: 10px;" onchange="previewImage(this, 'set-qr-preview')">
+          <input type="file" class="form-control" accept="image/*" style="padding: 10px;" id="set-qr-code" onchange="previewImage(this, 'set-qr-preview')">
           <img id="set-qr-preview" class="img-preview hidden">
         </div>
 
@@ -563,6 +601,18 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Bottom Nav for Admin (iPad & Mobile Only) -->
+  <div class="admin-bottom-nav mobile-only">
+    <div class="nav-item active" onclick="navAdmin('dashboard')"><span class="nav-icon">📊</span>หน้าแรก</div>
+    <div class="nav-item" onclick="navAdmin('transactions')">
+      <span class="nav-icon">📋</span>ธุรกรรม
+      <span id="admin-badge-tx-mobile" class="badge bg-red hidden" style="position: absolute; top: 0; right: 0; padding: 2px 6px; font-size: 9px; transform: translate(20%, -20%);">0</span>
+    </div>
+    <div class="nav-item" onclick="navAdmin('users')"><span class="nav-icon">👥</span>ลูกค้า</div>
+    <div class="nav-item" id="nav-settings-mobile" onclick="navAdmin('settings')"><span class="nav-icon">⚙️</span>ตั้งค่า</div>
+    <div class="nav-item" onclick="navCust('profile', true)"><span class="nav-icon">👤</span>โปรไฟล์</div>
   </div>
 </div>
 
@@ -593,7 +643,6 @@
 
 
 <script type="module">
-  // คงระบบ Firebase SDK และ Logic ภายในไว้สมบูรณ์ 100% ตามข้อจำกัด
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -608,7 +657,11 @@
     measurementId: "G-H6H6GL3NW6"
   };
   
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+  const safeParseJSON = (str, fallback) => {
+    try { return str ? JSON.parse(str) : fallback; } catch (e) { return fallback; }
+  };
+  
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? safeParseJSON(__firebase_config, fallbackConfig) : fallbackConfig;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'gold-savings-app';
 
   const app = initializeApp(firebaseConfig);
@@ -620,9 +673,11 @@
 
   window.appState = {
     currentUser: null,
-    users: JSON.parse(localStorage.getItem('cache_users') || '[]'),
-    transactions: JSON.parse(localStorage.getItem('cache_txs') || '[]'),
-    settings: JSON.parse(localStorage.getItem('cache_settings') || '{"shopName":"ร้านทองพรีเมียม","phone":"","line":"","bankName":"","bankAccName":"","bankAccNo":"","qrBase64":"","tgToken":"8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw","tgChatId":"-1003963635991","hasSuperAdmin":false}'),
+    users: safeParseJSON(localStorage.getItem('cache_users'), []),
+    transactions: safeParseJSON(localStorage.getItem('cache_txs'), []),
+    settings: safeParseJSON(localStorage.getItem('cache_settings'), {
+      shopName: 'ร้านทองพรีเมียม', phone: '', line: '', bankName: '', bankAccName: '', bankAccNo: '', qrBase64: '', shopLogoBase64: '', tgToken: '8731749401:AAEmA6wiK5o4NM0CcjJnmgt_827PbyMtPYw', tgChatId: '-1003963635991', hasSuperAdmin: false
+    }),
   };
 
   let pendingTxId = null;
@@ -630,15 +685,28 @@
 
   window.showToast = (msg, isError = false) => {
     const t = document.getElementById('toast');
+    if(!t) return;
     t.textContent = msg;
     t.style.background = isError ? "var(--red)" : "var(--black)";
     t.style.display = 'block';
     setTimeout(() => t.style.display = 'none', 3000);
   };
   
-  window.showLoading = (show) => document.getElementById('loading').style.display = show ? 'flex' : 'none';
-  window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-  window.openModal = (id) => document.getElementById(id).style.display = 'flex';
+  window.showLoading = (show) => {
+    const el = document.getElementById('loading');
+    if(el) el.style.display = show ? 'flex' : 'none';
+  };
+  
+  window.closeModal = (id) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  };
+  
+  window.openModal = (id) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'flex';
+  };
+  
   const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
   window.previewImage = (input, imgId) => {
@@ -655,8 +723,11 @@
           canvas.width = width; canvas.height = height;
           ctx.drawImage(img, 0, 0, width, height);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-          document.getElementById(imgId).src = dataUrl;
-          document.getElementById(imgId).classList.remove('hidden');
+          const el = document.getElementById(imgId);
+          if(el) {
+             el.src = dataUrl;
+             el.classList.remove('hidden');
+          }
           input.dataset.base64 = dataUrl;
         };
         img.src = e.target.result;
@@ -688,8 +759,8 @@
   };
 
   const initApp = async () => {
-    const savedUser = localStorage.getItem('goldAppUser');
-    if (savedUser) window.appState.currentUser = JSON.parse(savedUser);
+    const savedUser = safeParseJSON(localStorage.getItem('goldAppUser'), null);
+    if (savedUser) window.appState.currentUser = savedUser;
     
     updateSettingsUI();
     routeUser(); 
@@ -708,7 +779,7 @@
         await signInAnonymously(auth);
       }
     } catch (e) {
-      console.warn("Offline or Connection Error, continuing in local mode");
+      console.warn("Offline Mode");
     }
 
     setInterval(() => checkAndRunBackup(), 3600000);
@@ -750,25 +821,25 @@
   };
 
   window.switchAuthTab = (tab) => {
-    document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
-    document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
-    document.getElementById('tab-login').style.background = tab === 'login' ? 'white' : 'transparent';
-    document.getElementById('tab-register').style.background = tab === 'register' ? 'white' : 'transparent';
+    document.getElementById('form-login')?.classList.toggle('hidden', tab !== 'login');
+    document.getElementById('form-register')?.classList.toggle('hidden', tab !== 'register');
+    if(document.getElementById('tab-login')) document.getElementById('tab-login').style.background = tab === 'login' ? 'white' : 'transparent';
+    if(document.getElementById('tab-register')) document.getElementById('tab-register').style.background = tab === 'register' ? 'white' : 'transparent';
     
     if(tab === 'register') {
-      document.getElementById('secret-code-group').classList.toggle('hidden', window.appState.settings.hasSuperAdmin);
+      document.getElementById('secret-code-group')?.classList.toggle('hidden', window.appState.settings.hasSuperAdmin);
     }
   };
 
   const routeUser = () => {
-    document.getElementById('page-login').classList.add('hidden');
-    document.getElementById('page-customer').classList.add('hidden');
-    document.getElementById('page-admin').classList.add('hidden');
+    document.getElementById('page-login')?.classList.add('hidden');
+    document.getElementById('page-customer')?.classList.add('hidden');
+    document.getElementById('page-admin')?.classList.add('hidden');
     
     showLoading(false);
 
     if(!window.appState.currentUser) {
-      document.getElementById('page-login').classList.remove('hidden');
+      document.getElementById('page-login')?.classList.remove('hidden');
       return;
     }
 
@@ -776,11 +847,12 @@
     updateProfileUI();
 
     if(role === 'superadmin' || role === 'subadmin') {
-      document.getElementById('page-admin').classList.remove('hidden');
-      document.getElementById('nav-settings').classList.toggle('hidden', role !== 'superadmin');
+      document.getElementById('page-admin')?.classList.remove('hidden');
+      if(document.getElementById('nav-settings')) document.getElementById('nav-settings').classList.toggle('hidden', role !== 'superadmin');
+      if(document.getElementById('nav-settings-mobile')) document.getElementById('nav-settings-mobile').classList.toggle('hidden', role !== 'superadmin');
       navAdmin('dashboard');
     } else {
-      document.getElementById('page-customer').classList.remove('hidden');
+      document.getElementById('page-customer')?.classList.remove('hidden');
       navCust('home');
     }
   };
@@ -792,10 +864,10 @@
   };
 
   window.handleRegister = () => {
-    const name = document.getElementById('reg-name').value.trim();
-    const phone = document.getElementById('reg-phone').value.trim();
-    const pass = document.getElementById('reg-pass').value;
-    const secret = document.getElementById('reg-secret').value.trim();
+    const name = document.getElementById('reg-name')?.value.trim();
+    const phone = document.getElementById('reg-phone')?.value.trim();
+    const pass = document.getElementById('reg-pass')?.value;
+    const secret = document.getElementById('reg-secret')?.value.trim();
 
     if(!name || !phone || !pass) return showToast("กรุณากรอกข้อมูลให้ครบถ้วน", true);
     if(window.appState.users.find(u => u.phone === phone)) return showToast("เบอร์โทรนี้ถูกใช้งานแล้ว", true);
@@ -814,7 +886,7 @@
     }
 
     const docId = genId();
-    const newUser = { id: docId, phone, password: pass, name, role, email: '', balance: 0, createdAt: Date.now() };
+    const newUser = { id: docId, phone, password: pass, name, role, email: '', balance: 0, profilePicBase64: '', createdAt: Date.now() };
     
     safeSetDoc(getDocRef('appUsers', docId), newUser);
     
@@ -829,8 +901,8 @@
   };
 
   window.handleLogin = () => {
-    const phone = document.getElementById('login-phone').value.trim();
-    const pass = document.getElementById('login-pass').value;
+    const phone = document.getElementById('login-phone')?.value.trim();
+    const pass = document.getElementById('login-pass')?.value;
     
     const user = window.appState.users.find(u => u.phone === phone && u.password === pass);
     if(user) {
@@ -848,24 +920,45 @@
     if(!u) return;
     
     const bal = u.balance || 0;
-    document.getElementById('pro-name').textContent = u.name;
-    document.getElementById('edit-name').value = u.name;
-    document.getElementById('edit-phone').value = u.phone;
-    document.getElementById('edit-email').value = u.email || '';
+    if(document.getElementById('pro-name')) document.getElementById('pro-name').textContent = u.name;
+    if(document.getElementById('edit-name')) document.getElementById('edit-name').value = u.name;
+    if(document.getElementById('edit-phone')) document.getElementById('edit-phone').value = u.phone;
+    if(document.getElementById('edit-email')) document.getElementById('edit-email').value = u.email || '';
+    
     let rText = u.role === 'superadmin' ? 'ผู้ดูแลระบบหลัก' : (u.role === 'subadmin' ? 'ผู้ช่วยผู้ดูแล' : 'ลูกค้า');
-    document.getElementById('pro-role').textContent = rText;
-    document.getElementById('cust-balance').textContent = bal.toLocaleString();
-    document.getElementById('cust-withdraw-max').textContent = bal.toLocaleString();
+    if(document.getElementById('pro-role')) document.getElementById('pro-role').textContent = rText;
+    if(document.getElementById('cust-balance')) document.getElementById('cust-balance').textContent = bal.toLocaleString();
+    if(document.getElementById('cust-withdraw-max')) document.getElementById('cust-withdraw-max').textContent = bal.toLocaleString();
+
+    if(u.profilePicBase64) {
+      if(document.getElementById('pro-avatar-img')) {
+         document.getElementById('pro-avatar-img').src = u.profilePicBase64;
+         document.getElementById('pro-avatar-img').style.display = 'block';
+      }
+      if(document.getElementById('pro-avatar-fallback')) document.getElementById('pro-avatar-fallback').style.display = 'none';
+      if(document.getElementById('profile-preview')) {
+         document.getElementById('profile-preview').src = u.profilePicBase64;
+         document.getElementById('profile-preview').classList.remove('hidden');
+      }
+    }
   };
 
   window.updateProfile = () => {
-    const name = document.getElementById('edit-name').value;
-    const email = document.getElementById('edit-email').value;
+    const name = document.getElementById('edit-name')?.value;
+    const email = document.getElementById('edit-email')?.value;
+    const picInput = document.getElementById('edit-profile-pic');
+    
     showLoading(true);
+    
+    let updateData = { name, email };
+    if(picInput && picInput.dataset.base64) {
+      updateData.profilePicBase64 = picInput.dataset.base64;
+      window.appState.currentUser.profilePicBase64 = picInput.dataset.base64;
+    }
     
     window.appState.currentUser.name = name;
     window.appState.currentUser.email = email;
-    safeUpdateDoc(getDocRef('appUsers', window.appState.currentUser.id), { name, email });
+    safeUpdateDoc(getDocRef('appUsers', window.appState.currentUser.id), updateData);
     
     showToast("บันทึกโปรไฟล์สำเร็จ");
     updateProfileUI();
@@ -873,7 +966,7 @@
   };
 
   window.updatePassword = () => {
-    const pass = document.getElementById('edit-pass').value;
+    const pass = document.getElementById('edit-pass')?.value;
     if(!pass) return showToast("กรุณากรอกรหัสผ่านใหม่", true);
     showLoading(true);
     
@@ -881,33 +974,37 @@
     safeUpdateDoc(getDocRef('appUsers', window.appState.currentUser.id), { password: pass });
     
     showToast("เปลี่ยนรหัสผ่านสำเร็จ");
-    document.getElementById('edit-pass').value = '';
+    if(document.getElementById('edit-pass')) document.getElementById('edit-pass').value = '';
     setTimeout(() => showLoading(false), 200);
   };
 
   window.navCust = (tab, fromAdmin = false) => {
     document.querySelectorAll('#page-customer .app-container').forEach(e => e.classList.add('hidden'));
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('#page-customer .bottom-nav .nav-item').forEach(e => e.classList.remove('active'));
     
     if(fromAdmin) {
-       document.getElementById('page-admin').classList.add('hidden');
-       document.getElementById('page-customer').classList.remove('hidden');
-       document.querySelector('.app-header button').setAttribute('onclick', 'routeUser()');
-       document.querySelector('.app-header button').textContent = 'กลับหน้าแอดมิน';
+       document.getElementById('page-admin')?.classList.add('hidden');
+       document.getElementById('page-customer')?.classList.remove('hidden');
+       if(document.querySelector('.app-header button')) {
+           document.querySelector('.app-header button').setAttribute('onclick', 'routeUser()');
+           document.querySelector('.app-header button').textContent = 'กลับหน้าแอดมิน';
+       }
     } else {
-       document.querySelector('.app-header button').setAttribute('onclick', 'logout()');
-       document.querySelector('.app-header button').textContent = 'ออกจากระบบ';
+       if(document.querySelector('.app-header button')) {
+           document.querySelector('.app-header button').setAttribute('onclick', 'logout()');
+           document.querySelector('.app-header button').textContent = 'ออกจากระบบ';
+       }
     }
 
-    document.getElementById(`cust-content-${tab}`).classList.remove('hidden');
-    const navItem = document.querySelector(`.bottom-nav .nav-item[onclick="navCust('${tab}')"]`);
+    document.getElementById(`cust-content-${tab}`)?.classList.remove('hidden');
+    const navItem = document.querySelector(`#page-customer .bottom-nav .nav-item[onclick="navCust('${tab}')"]`);
     if(navItem) navItem.classList.add('active');
-    window.scrollTo(0, 0); // Scroll top on tab change
+    window.scrollTo(0, 0); 
   };
 
   window.submitDeposit = () => {
-    const amount = parseFloat(document.getElementById('dep-amount').value);
-    const remark = document.getElementById('dep-remark').value;
+    const amount = parseFloat(document.getElementById('dep-amount')?.value);
+    const remark = document.getElementById('dep-remark')?.value;
     const slipInput = document.getElementById('dep-slip');
     const slipBase64 = slipInput?.dataset?.base64;
 
@@ -926,10 +1023,10 @@
     
     sendTgMsg(`📥 <b>แจ้งเตือนฝากออม</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nสถานะ: รอตรวจสอบ`);
     
-    document.getElementById('dep-amount').value = '';
-    document.getElementById('dep-remark').value = '';
-    document.getElementById('dep-preview').classList.add('hidden');
-    slipInput.value = ''; slipInput.dataset.base64 = '';
+    if(document.getElementById('dep-amount')) document.getElementById('dep-amount').value = '';
+    if(document.getElementById('dep-remark')) document.getElementById('dep-remark').value = '';
+    document.getElementById('dep-preview')?.classList.add('hidden');
+    if(slipInput) { slipInput.value = ''; slipInput.dataset.base64 = ''; }
     
     showToast("ส่งคำขอฝากออมสำเร็จ รอตรวจสอบ");
     renderCustomerHistory();
@@ -938,8 +1035,8 @@
   };
 
   window.submitWithdraw = () => {
-    const amount = parseFloat(document.getElementById('wit-amount').value);
-    const remark = document.getElementById('wit-remark').value;
+    const amount = parseFloat(document.getElementById('wit-amount')?.value);
+    const remark = document.getElementById('wit-remark')?.value;
     const max = window.appState.currentUser.balance || 0;
 
     if(!amount || amount <= 0) return showToast("กรุณาระบุยอดเงินที่ถูกต้อง", true);
@@ -957,8 +1054,8 @@
     
     sendTgMsg(`📤 <b>แจ้งเตือนขอถอนเงิน/แลกทอง</b>\nจาก: ${tx.userName}\nยอดเงิน: ฿${amount.toLocaleString()}\nหมายเหตุ: ${remark}\nสถานะ: รอตรวจสอบ`);
     
-    document.getElementById('wit-amount').value = '';
-    document.getElementById('wit-remark').value = '';
+    if(document.getElementById('wit-amount')) document.getElementById('wit-amount').value = '';
+    if(document.getElementById('wit-remark')) document.getElementById('wit-remark').value = '';
     
     showToast("ส่งคำขอถอนสำเร็จ รอร้านยืนยัน");
     renderCustomerHistory();
@@ -974,12 +1071,12 @@
       el.innerHTML = '';
       const list = limit ? txs.slice(0,limit) : txs;
       
-      if(list.length === 0) return el.innerHTML = '<div style="text-align:center; padding:20px; color:gray;">ยังไม่มีรายการธุรกรรม</div>';
+      if(list.length === 0) { el.innerHTML = '<div style="text-align:center; padding:20px; color:gray;">ยังไม่มีรายการธุรกรรม</div>'; return; }
 
       list.forEach(t => {
         let icon = t.type==='deposit' ? '📥' : '📤';
         let color = t.type==='deposit' ? 'var(--green)' : 'var(--red)';
-        let statusBadge = t.status==='approved' ? '<span class="badge bg-green">สำเร็จ</span>' : (t.status==='rejected' ? '<span class="badge bg-red">ปฏิเสธ</span>' : '<span class="badge bg-yellow">รออนุมัติ</span>');
+        let statusBadge = t.status==='approved' ? '<span class="badge bg-green">สำเร็จ</span>' : (t.status==='rejected' ? '<span class="badge bg-red">ถูกปฏิเสธ</span>' : '<span class="badge bg-yellow">รออนุมัติ</span>');
         let d = new Date(t.date).toLocaleString('th-TH');
         
         el.innerHTML += `
@@ -1004,47 +1101,58 @@
   };
 
   window.navAdmin = (sec) => {
+    // Hide all admin content sections
     document.querySelectorAll('#admin-content-area > div').forEach(e => {
-       if(e.id !== 'admin-page-title' && !e.id.includes('title')) e.classList.add('hidden');
+       if(e.id !== 'admin-page-title' && !e.id.includes('title') && !e.classList.contains('admin-topbar')) e.classList.add('hidden');
     });
-    document.querySelectorAll('.admin-nav-item').forEach(e => e.classList.remove('active'));
+    // Remove active class
+    document.querySelectorAll('.admin-nav-item, .admin-bottom-nav .nav-item').forEach(e => e.classList.remove('active'));
     
-    document.getElementById(`admin-sec-${sec}`).classList.remove('hidden');
-    const el = document.querySelector(`.admin-nav-item[onclick="navAdmin('${sec}')"]`);
-    if(el) el.classList.add('active');
+    // Show section
+    document.getElementById(`admin-sec-${sec}`)?.classList.remove('hidden');
+    
+    // Add active to Desktop nav
+    const elDesktop = document.querySelector(`.admin-sidebar .admin-nav-item[onclick="navAdmin('${sec}')"]`);
+    if(elDesktop) elDesktop.classList.add('active');
+
+    // Add active to Mobile nav
+    const elMobile = document.querySelector(`.admin-bottom-nav .nav-item[onclick="navAdmin('${sec}')"]`);
+    if(elMobile) elMobile.classList.add('active');
     
     const titles = { dashboard: 'ภาพรวมระบบ', transactions: 'รายการธุรกรรม', users: 'จัดการผู้ใช้งาน', settings: 'ตั้งค่าร้านค้า' };
-    document.getElementById('admin-page-title').textContent = titles[sec] || sec;
+    const titleText = titles[sec] || sec;
+    if(document.getElementById('admin-page-title')) document.getElementById('admin-page-title').textContent = titleText;
+    if(document.getElementById('admin-page-title-mobile')) document.getElementById('admin-page-title-mobile').textContent = titleText;
     
-    if(window.innerWidth <= 768) {
-      document.getElementById('admin-sidebar').classList.remove('open');
-      document.getElementById('admin-sidebar-backdrop').style.display = 'none';
-    }
     window.scrollTo(0, 0);
   };
 
-  window.toggleAdminSidebar = () => {
-    const sidebar = document.getElementById('admin-sidebar');
-    const backdrop = document.getElementById('admin-sidebar-backdrop');
-    sidebar.classList.toggle('open');
-    backdrop.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-  };
+  // ไม่ได้ใช้ Sidebar แบบเลื่อนแล้ว แต่ป้องกัน error ทิ้งไว้
+  window.toggleAdminSidebar = () => {};
 
   const updateDashboardStats = () => {
     let bal = window.appState.users.reduce((sum, u) => sum + (u.balance || 0), 0);
     let pending = window.appState.transactions.filter(t => t.status === 'pending').length;
     
-    document.getElementById('stat-total-balance').textContent = bal.toLocaleString();
-    document.getElementById('stat-total-users').textContent = window.appState.users.filter(u=>u.role!=='superadmin').length;
-    document.getElementById('stat-pending').textContent = pending;
+    if(document.getElementById('stat-total-balance')) document.getElementById('stat-total-balance').textContent = bal.toLocaleString();
+    if(document.getElementById('stat-total-users')) document.getElementById('stat-total-users').textContent = window.appState.users.filter(u=>u.role!=='superadmin').length;
+    if(document.getElementById('stat-pending')) document.getElementById('stat-pending').textContent = pending;
     
-    const badge = document.getElementById('admin-badge-tx');
-    badge.textContent = pending;
-    badge.classList.toggle('hidden', pending === 0);
+    const badgeDesktop = document.getElementById('admin-badge-tx');
+    if(badgeDesktop) {
+        badgeDesktop.textContent = pending;
+        badgeDesktop.classList.toggle('hidden', pending === 0);
+    }
+    const badgeMobile = document.getElementById('admin-badge-tx-mobile');
+    if(badgeMobile) {
+        badgeMobile.textContent = pending;
+        badgeMobile.classList.toggle('hidden', pending === 0);
+    }
   };
 
   const renderAdminTransactions = () => {
     const tbody = document.querySelector('#table-tx tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
 
     window.appState.transactions.forEach(t => {
@@ -1077,20 +1185,24 @@
 
   const renderAdminUsers = () => {
     const tbody = document.querySelector('#table-users tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
     const myRole = window.appState.currentUser?.role;
 
     window.appState.users.forEach(u => {
       let tr = document.createElement('tr');
-      let rText = u.role === 'superadmin' ? '<span class="badge bg-gold">Super Admin</span>' : (u.role === 'subadmin' ? '<span class="badge bg-green">Admin</span>' : '<span class="badge" style="background:#eee;">ลูกค้า</span>');
+      let rText = u.role === 'superadmin' ? '<span class="badge bg-gold">Super Admin</span>' : (u.role === 'subadmin' ? '<span class="badge bg-green">Admin</span>' : '<span class="badge" style="background:#eee; color:var(--black)">ลูกค้า</span>');
       
       let actionBtns = '-';
       if(myRole === 'superadmin' && u.id !== window.appState.currentUser.id) {
         let toggleRole = u.role === 'customer' ? `<button class="btn btn-sm btn-outline" onclick="changeRole('${u.id}', 'subadmin')">ตั้งเป็น Admin</button>` : `<button class="btn btn-sm btn-outline" style="border-color:var(--red); color:var(--red)" onclick="changeRole('${u.id}', 'customer')">ปลด Admin</button>`;
         actionBtns = toggleRole;
       }
+      
+      let userAvatar = u.profilePicBase64 ? `<img src="${u.profilePicBase64}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:50%; background:var(--gray-light); display:flex; align-items:center; justify-content:center; font-size:16px;">👤</div>`;
 
       tr.innerHTML = `
+        <td>${userAvatar}</td>
         <td><b style="font-size:15px;">${u.name}</b></td>
         <td style="color:var(--gray);">${u.phone}</td>
         <td>${rText}</td>
@@ -1124,13 +1236,13 @@
 
   window.openEditWithdraw = (txId, reqAmount) => {
     pendingTxId = txId;
-    document.getElementById('mw-req-amt').textContent = (reqAmount || 0).toLocaleString();
-    document.getElementById('mw-app-amt').value = reqAmount || 0;
+    if(document.getElementById('mw-req-amt')) document.getElementById('mw-req-amt').textContent = (reqAmount || 0).toLocaleString();
+    if(document.getElementById('mw-app-amt')) document.getElementById('mw-app-amt').value = reqAmount || 0;
     openModal('modal-edit-withdraw');
   };
 
   window.confirmApproveWithdraw = () => {
-    const appAmt = parseFloat(document.getElementById('mw-app-amt').value);
+    const appAmt = parseFloat(document.getElementById('mw-app-amt')?.value);
     if(isNaN(appAmt) || appAmt <= 0) return showToast("ยอดเงินไม่ถูกต้อง", true);
     closeModal('modal-edit-withdraw');
     processTx(pendingTxId, 'approved', appAmt);
@@ -1196,46 +1308,67 @@
 
   const updateSettingsUI = () => {
     const s = window.appState.settings;
-    document.getElementById('cust-header-name').textContent = s.shopName || 'ร้านออมทอง';
-    document.getElementById('admin-shop-name').textContent = s.shopName || 'ร้านออมทอง';
+    if(document.getElementById('cust-header-name')) document.getElementById('cust-header-name').textContent = s.shopName || 'ร้านออมทอง';
+    if(document.getElementById('admin-shop-name')) document.getElementById('admin-shop-name').textContent = s.shopName || 'ร้านออมทอง';
+    if(document.getElementById('admin-shop-name-sidebar')) document.getElementById('admin-shop-name-sidebar').textContent = s.shopName || 'ร้านออมทอง';
     
-    document.getElementById('cust-bank-name').textContent = s.bankName || '-';
-    document.getElementById('cust-bank-accname').textContent = s.bankAccName || '-';
-    document.getElementById('cust-bank-accno').textContent = s.bankAccNo || '-';
-    document.getElementById('cust-shop-contact').innerHTML = `โทร: ${s.phone || '-'} <br> Line: ${s.line || '-'}`;
+    if(document.getElementById('cust-bank-name')) document.getElementById('cust-bank-name').textContent = s.bankName || '-';
+    if(document.getElementById('cust-bank-accname')) document.getElementById('cust-bank-accname').textContent = s.bankAccName || '-';
+    if(document.getElementById('cust-bank-accno')) document.getElementById('cust-bank-accno').textContent = s.bankAccNo || '-';
+    if(document.getElementById('cust-shop-contact')) document.getElementById('cust-shop-contact').innerHTML = `โทร: ${s.phone || '-'} <br> Line: ${s.line || '-'}`;
     
-    if(s.qrBase64) {
-      document.getElementById('cust-qr-img').src = s.qrBase64;
-      document.getElementById('cust-qr-img').style.display = 'block';
-      document.getElementById('cust-qr-placeholder').style.display = 'none';
-      document.getElementById('set-qr-preview').src = s.qrBase64;
-      document.getElementById('set-qr-preview').classList.remove('hidden');
+    if(s.shopLogoBase64) {
+      if(document.getElementById('cust-header-logo')) {
+          document.getElementById('cust-header-logo').src = s.shopLogoBase64;
+          document.getElementById('cust-header-logo').style.display = 'block';
+      }
+      if(document.getElementById('cust-header-logo-fallback')) document.getElementById('cust-header-logo-fallback').style.display = 'none';
+      if(document.getElementById('set-logo-preview')) {
+          document.getElementById('set-logo-preview').src = s.shopLogoBase64;
+          document.getElementById('set-logo-preview').classList.remove('hidden');
+      }
     }
 
-    document.getElementById('set-shopname').value = s.shopName || '';
-    document.getElementById('set-phone').value = s.phone || '';
-    document.getElementById('set-line').value = s.line || '';
-    document.getElementById('set-bankname').value = s.bankName || '';
-    document.getElementById('set-bankaccname').value = s.bankAccName || '';
-    document.getElementById('set-bankaccno').value = s.bankAccNo || '';
-    document.getElementById('set-tg-token').value = s.tgToken || '';
-    document.getElementById('set-tg-chatid').value = s.tgChatId || '';
+    if(s.qrBase64) {
+      if(document.getElementById('cust-qr-img')) {
+          document.getElementById('cust-qr-img').src = s.qrBase64;
+          document.getElementById('cust-qr-img').style.display = 'block';
+      }
+      if(document.getElementById('cust-qr-placeholder')) document.getElementById('cust-qr-placeholder').style.display = 'none';
+      if(document.getElementById('set-qr-preview')) {
+          document.getElementById('set-qr-preview').src = s.qrBase64;
+          document.getElementById('set-qr-preview').classList.remove('hidden');
+      }
+    }
+
+    if(document.getElementById('set-shopname')) document.getElementById('set-shopname').value = s.shopName || '';
+    if(document.getElementById('set-phone')) document.getElementById('set-phone').value = s.phone || '';
+    if(document.getElementById('set-line')) document.getElementById('set-line').value = s.line || '';
+    if(document.getElementById('set-bankname')) document.getElementById('set-bankname').value = s.bankName || '';
+    if(document.getElementById('set-bankaccname')) document.getElementById('set-bankaccname').value = s.bankAccName || '';
+    if(document.getElementById('set-bankaccno')) document.getElementById('set-bankaccno').value = s.bankAccNo || '';
+    if(document.getElementById('set-tg-token')) document.getElementById('set-tg-token').value = s.tgToken || '';
+    if(document.getElementById('set-tg-chatid')) document.getElementById('set-tg-chatid').value = s.tgChatId || '';
   };
 
   window.saveSettings = () => {
     showLoading(true);
     const newData = {
-      shopName: document.getElementById('set-shopname').value,
-      phone: document.getElementById('set-phone').value,
-      line: document.getElementById('set-line').value,
-      bankName: document.getElementById('set-bankname').value,
-      bankAccName: document.getElementById('set-bankaccname').value,
-      bankAccNo: document.getElementById('set-bankaccno').value,
-      tgToken: document.getElementById('set-tg-token').value,
-      tgChatId: document.getElementById('set-tg-chatid').value,
+      shopName: document.getElementById('set-shopname')?.value || '',
+      phone: document.getElementById('set-phone')?.value || '',
+      line: document.getElementById('set-line')?.value || '',
+      bankName: document.getElementById('set-bankname')?.value || '',
+      bankAccName: document.getElementById('set-bankaccname')?.value || '',
+      bankAccNo: document.getElementById('set-bankaccno')?.value || '',
+      tgToken: document.getElementById('set-tg-token')?.value || '',
+      tgChatId: document.getElementById('set-tg-chatid')?.value || '',
     };
-    const qrInput = document.querySelector('input[type="file"]');
-    if(qrInput.dataset.base64) newData.qrBase64 = qrInput.dataset.base64;
+    
+    const qrInput = document.getElementById('set-qr-code');
+    if(qrInput && qrInput.dataset.base64) newData.qrBase64 = qrInput.dataset.base64;
+
+    const logoInput = document.getElementById('set-shop-logo');
+    if(logoInput && logoInput.dataset.base64) newData.shopLogoBase64 = logoInput.dataset.base64;
 
     window.appState.settings = {...window.appState.settings, ...newData};
     localStorage.setItem('cache_settings', JSON.stringify(window.appState.settings));
