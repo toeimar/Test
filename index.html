@@ -230,12 +230,12 @@
   .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  /* ===== ADDED CUSTOM STYLES (NEW FEATURES) ===== */
+  /* ===== ADDED CUSTOM STYLES ===== */
   .points-badge { background: linear-gradient(135deg, #FFD700, #F47C20); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-left: auto;}
   .contact-bar { background: var(--navy); color: white; padding: 10px 24px; display:flex; justify-content: space-between; align-items:center; font-size:12px; z-index: 101; position: relative;}
   .contact-bar a {color:var(--orange-light); text-decoration: none; font-weight: bold;}
   
-  /* Membership Card UI (ข้อ 4) */
+  /* Membership Card UI */
   .membership-card {
       width: 100%; max-width: 420px; height: 240px; border-radius: 20px; padding: 24px;
       color: white; position: relative; overflow: hidden; display: flex; flex-direction: column;
@@ -260,18 +260,59 @@
   .card-name { font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
   .card-id { font-size: 11px; font-family: monospace; opacity: 0.7; }
 
-  /* Reward CRM Grid */
+  /* Reward Grid */
   .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
   .reward-card { background: #fff; border-radius: 16px; padding: 16px; border: 1px solid var(--gray-200); text-align: center; }
   .reward-img { width: 100%; height: 120px; background: var(--gray-100); border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
 
+  /* ===== RESPONSIVE & BOTTOM NAVIGATION (ข้อ 8) ===== */
   @media (max-width: 1100px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .calendar-wrapper { grid-template-columns: 1fr; }
   }
   @media (max-width: 768px) {
-    #sidebar { transform: translateX(-100%); }
-    #main { margin-left: 0; padding: 16px; }
+    /* เปลี่ยน Sidebar ซ้าย เป็น Bottom Bar ด้านล่าง */
+    #sidebar {
+      transform: none !important; 
+      top: auto !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      height: 70px !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: row !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      background: var(--navy);
+    }
+    #userMenu, #adminMenu {
+      display: flex;
+      flex-direction: row;
+      width: max-content; 
+    }
+    .sidebar-section { display: none; } 
+    .sidebar-item {
+      flex-direction: column;
+      padding: 8px 12px;
+      font-size: 10px;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      min-width: 80px;
+      text-align: center;
+      justify-content: center;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .sidebar-item.active {
+      border-left-color: transparent;
+      border-bottom-color: var(--blue-light);
+      background: rgba(30,111,217,.1);
+    }
+    .sidebar-item .icon { font-size: 20px; margin-bottom: 2px; width:auto;}
+    
+    #main { margin-left: 0; padding: 16px; margin-bottom: 80px !important; } 
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .contact-bar { flex-direction: column; gap: 8px; text-align:center;}
   }
@@ -362,7 +403,8 @@
       <div class="sidebar-item active" onclick="showPage('dashboard')"><span class="icon">🏠</span> แดชบอร์ด</div>
       <div class="sidebar-item" onclick="showPage('booking')"><span class="icon">📅</span> จองคลาส</div>
       <div class="sidebar-item" onclick="showPage('packages')"><span class="icon">💳</span> แพ็กเกจ / สมาชิก</div>
-      <div class="sidebar-item" onclick="showPage('crm')"><span class="icon">🎁</span> แลกของรางวัล (CRM)</div>
+      <!-- ข้อ 4: แลกของรางวัล (ไม่มี CRM) -->
+      <div class="sidebar-item" onclick="showPage('crm')"><span class="icon">🎁</span> แลกของรางวัล</div>
       <div class="sidebar-item" onclick="showPage('profile')"><span class="icon">👤</span> โปรไฟล์ของฉัน</div>
       <div class="sidebar-item" onclick="showPage('history')"><span class="icon">📋</span> ประวัติการจอง</div>
     </div>
@@ -390,10 +432,10 @@
       <div class="page-title">สวัสดี, <span id="welcomeName">น้องๆ</span>! 👋</div>
       <div class="page-sub">วันนี้พร้อมออกกำลังกายไหม?</div>
       
-      <!-- ข้อ 1: เอาปุ่มสแกนรับคะแนนออก (ซ่อนโค้ดเดิมไว้ตามคำสั่งห้ามลบ) -->
+      <!-- ข้อ 1 (ก่อนหน้า): ซ่อนปุ่มสแกน -->
       <button class="btn btn-primary" style="margin-bottom:20px; display:none;" onclick="simulateQRScan()">📷 สแกน QR รับคะแนน</button>
 
-      <!-- ข้อ 4: Dashboard บัตรสมาชิก -->
+      <!-- Dashboard บัตรสมาชิก -->
       <div class="membership-card card-level-Basic" id="memCardBg">
          <div class="card-top">
             <div class="card-logo-txt">KID SPORT</div>
@@ -427,17 +469,15 @@
       </div>
     </div>
 
-    <!-- ===== CRM / REWARDS (User) ข้อ 3 ===== -->
+    <!-- ===== REWARDS (User) ===== -->
     <div id="crmPage" class="page hidden">
-      <div class="page-title">🎁 แลกของรางวัล (CRM)</div>
+      <div class="page-title">🎁 แลกของรางวัล</div>
       <div class="page-sub">ใช้คะแนนสะสมที่มีเพื่อแลกของรางวัลพิเศษ</div>
       <div class="card" style="margin-bottom:20px; background: linear-gradient(90deg, var(--navy), var(--blue)); color:white;">
         <h3 style="margin-bottom:5px;">คะแนนของคุณ</h3>
         <div style="font-size:32px; font-weight:900;">🌟 <span id="crmUserPoints">0</span> <span style="font-size:14px; font-weight:400">แต้ม</span></div>
       </div>
-      <div class="rewards-grid" id="crmRewardsGrid">
-         <!-- Render by JS -->
-      </div>
+      <div class="rewards-grid" id="crmRewardsGrid"></div>
     </div>
 
     <!-- ===== BOOKING PAGE ===== -->
@@ -478,7 +518,7 @@
               <div class="price-row"><span>จำนวน</span><span id="priceCount">x 0</span></div>
               <div class="price-row total"><span>รวมทั้งหมด</span><span id="priceTotal" style="color:var(--orange);">฿0</span></div>
             </div>
-            <button class="btn btn-orange" style="width:100%;justify-content:center;" onclick="showPage('payment')">💳 ดำเนินการชำระเงิน →</button>
+            <button class="btn btn-orange" style="width:100%;justify-content:center;" onclick="preparePayment('class')">💳 ดำเนินการชำระเงิน →</button>
             <button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:8px;" onclick="clearBooking()">ล้างการเลือก</button>
           </div>
         </div>
@@ -509,10 +549,10 @@
           </div>
         </div>
         <div class="card" style="height:fit-content;">
-          <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;">🧾 สรุปคำสั่งจอง</h3>
+          <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;">🧾 สรุปคำสั่งซื้อ</h3>
           <div class="booking-summary">
-            <div class="booking-item"><span class="booking-item-label">คลาส</span><span class="booking-item-val" id="pay-class">-</span></div>
-            <div class="booking-item"><span class="booking-item-label">จำนวน</span><span class="booking-item-val" id="pay-count">0 ครั้ง</span></div>
+            <div class="booking-item"><span class="booking-item-label">รายการ</span><span class="booking-item-val" id="pay-class">-</span></div>
+            <div class="booking-item"><span class="booking-item-label">จำนวน</span><span class="booking-item-val" id="pay-count">0</span></div>
           </div>
           <div class="price-breakdown">
             <div class="price-row total"><span>ยอดรวม</span><span id="pay-total" style="color:var(--orange);">฿0</span></div>
@@ -548,7 +588,7 @@
 
     <!-- ===== HISTORY ===== -->
     <div id="historyPage" class="page hidden">
-      <div class="page-title">📋 ประวัติการจอง</div>
+      <div class="page-title">📋 ประวัติการจอง/สั่งซื้อ</div>
       <div class="card"><div class="history-list" id="myHistoryList"><p>ยังไม่มีประวัติ</p></div></div>
     </div>
 
@@ -560,9 +600,8 @@
         <button class="btn btn-success main-admin-only" onclick="downloadExcel()">📥 ดาวน์โหลด Report ลูกค้า (Excel)</button>
       </div>
       <div class="stats-grid">
-        <!-- ข้อ 7: statUsers จะแสดงยอดรวมทุกไอดีรวมแอดมิน (เขียนควบคุมด้วย JS ด้านล่าง) -->
         <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-value" id="statUsers">0</div><div class="stat-label">สมาชิกและแอดมินทั้งหมด</div></div>
-        <div class="stat-card orange"><div class="stat-icon">📅</div><div class="stat-value" id="statBookings">0</div><div class="stat-label">การจองทั้งหมด</div></div>
+        <div class="stat-card orange"><div class="stat-icon">📅</div><div class="stat-value" id="statBookings">0</div><div class="stat-label">ยอดจองและคำสั่งซื้อ</div></div>
       </div>
     </div>
 
@@ -594,19 +633,17 @@
       </div>
     </div>
 
-    <!-- ข้อ 5: จัดการคลาส (เพิ่ม ลบ แก้ไข) -->
     <div id="adminClassesPage" class="page hidden">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
         <div>
            <div class="page-title">🏋️ จัดการคลาส / บริการ</div>
-           <div class="page-sub">ช่วงเวลาคือ เวลาการสอนในแต่ละคลาสเพื่อนำไปแสดงบนปฏิทิน</div>
+           <div class="page-sub">ช่วงเวลาคือ เวลาการสอนเพื่อแสดงบนปฏิทิน (เพิ่มได้มากกว่า 1 เวลา)</div>
         </div>
         <button class="btn btn-primary" onclick="openClassModal()">+ เพิ่มคลาสใหม่</button>
       </div>
       <div class="class-setup-grid" id="adminClassesGrid"></div>
     </div>
 
-    <!-- ข้อ 2: จัดการแพ็กเกจ (เพิ่ม ลบ แก้ไข และหมายเหตุ) -->
     <div id="adminPackagesPage" class="page hidden">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
         <div class="page-title">📦 จัดการแพ็กเกจสมาชิก</div>
@@ -620,10 +657,9 @@
       </div>
     </div>
 
-    <!-- ข้อ 3: ระบบ CRM ฝั่งแอดมิน -->
     <div id="adminCrmPage" class="page hidden">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <div class="page-title">🎁 จัดการของรางวัล (CRM)</div>
+        <div class="page-title">🎁 จัดการของรางวัล</div>
         <button class="btn btn-primary" onclick="openRewardModal()">+ เพิ่มของรางวัล</button>
       </div>
       <div class="table-wrapper">
@@ -651,7 +687,6 @@
       </div>
 
       <div id="setSys">
-        <!-- ข้อ 6: ตั้งค่าเวลาชนกันได้หรือไม่ -->
         <div class="card" style="margin-bottom:20px;">
            <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">⏳ กฎการจองและทับซ้อนเวลา</h3>
            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -698,7 +733,10 @@
 
       <div id="setAdmins" class="hidden main-admin-only">
         <div class="card">
-          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">บัญชีแอดมินทั้งหมด</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:700;">บัญชีแอดมินทั้งหมด</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddAdminModal()">+ เพิ่มแอดมิน</button>
+          </div>
           <div class="table-wrapper">
             <table>
               <thead><tr><th>ชื่อ</th><th>อีเมล</th><th>สิทธิ์</th><th>จัดการ</th></tr></thead>
@@ -754,14 +792,14 @@
 
 <script>
 // =========================================================
-// STATE
+// STATE & LOCALSTORAGE (ข้อ 7: ระบบจดจำ User)
 // =========================================================
 let STATE = {
   adminCodeUsed: false,
   users: [],
   classes: [
-    { id: 1, name: "ว่ายน้ำเด็กเล็ก", trainer: "ครูส้ม", slots: "09:00", price: 350 },
-    { id: 2, name: "ฟุตบอลพื้นฐาน", trainer: "โค้ชเอก", slots: "15:00", price: 300 }
+    { id: 1, name: "ว่ายน้ำเด็กเล็ก", trainer: "ครูส้ม", slots: "09:00, 14:00", duration: "60 นาที", price: 350 },
+    { id: 2, name: "ฟุตบอลพื้นฐาน", trainer: "โค้ชเอก", slots: "15:00, 16:30", duration: "1.5 ชั่วโมง", price: 300 }
   ],
   packages: [
     { id: 1, name: "แพ็กเกจเรียน 10 ครั้ง", price: 3000, note: "แถมฟรีเสื้อยืด 1 ตัว หมดเขตสิ้นปี" }
@@ -773,47 +811,57 @@ let STATE = {
   promotions: [],
   bookings: [],
   settings: {
-    levels: ["Basic", "Gold", "Diamond"],
-    autoPoints: 50,
-    bahtRatio: 10,
-    storeName: "KidSport Academy",
-    storeLogo: null,
-    phone: "080-000-0000",
-    line: "@kidsport",
-    link: "https://lin.ee",
-    payBankName: "กสิกรไทย",
-    payAccName: "บจก. คิดส์สปอร์ต",
-    payAccNo: "098-XXX-XXXX",
-    payQR: null,
-    allowSameOverlap: true, // ข้อ 6
-    allowDiffOverlap: true  // ข้อ 6
+    levels: ["Basic", "Gold", "Diamond"], autoPoints: 50, bahtRatio: 10,
+    storeName: "KidSport Academy", storeLogo: null, phone: "080-000-0000", line: "@kidsport", link: "https://lin.ee",
+    payBankName: "กสิกรไทย", payAccName: "บจก. คิดส์สปอร์ต", payAccNo: "098-XXX-XXXX", payQR: null,
+    allowSameOverlap: true, allowDiffOverlap: true  
   }
 };
 
 let currentUser = null;
 let isViewingAsCustomer = false;
+let currentPaymentContext = null; // เก็บข้อมูลก่อนจ่ายเงิน (จองคลาส หรือ ซื้อแพ็กเกจ)
 
-let selectedDates = [];
-let selectedTimes = [];
-let selectedClass = null;
+let selectedDates = []; let selectedTimes = []; let selectedClass = null;
 let calYear = 2026, calMonth = 4;
 let adminCalYear = 2026, adminCalMonth = 4;
-
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+// Save to / Load from LocalStorage
+function saveState() {
+    localStorage.setItem('kidSportState', JSON.stringify(STATE));
+    if(currentUser) {
+        // อัปเดต currentUser ใน array ด้วย
+        const uIdx = STATE.users.findIndex(u => u.id === currentUser.id);
+        if(uIdx > -1) STATE.users[uIdx] = currentUser;
+        localStorage.setItem('kidSportUser', JSON.stringify(currentUser));
+    } else {
+        localStorage.removeItem('kidSportUser');
+    }
+}
+
+function loadState() {
+    const saved = localStorage.getItem('kidSportState');
+    if(saved) STATE = JSON.parse(saved);
+    const savedUser = localStorage.getItem('kidSportUser');
+    if(savedUser) currentUser = JSON.parse(savedUser);
+}
 
 // =========================================================
 // STARTUP
 // =========================================================
 window.addEventListener('load', () => {
+  loadState();
+  
   setTimeout(() => {
     document.getElementById('loader').style.opacity = '0';
     setTimeout(() => document.getElementById('loader').style.display = 'none', 400);
+    
+    if(currentUser) {
+        enterApp(); // ถ้ามี login ค้างไว้ ให้เข้าสู่ระบบเลย
+    }
   }, 500);
 
-  document.getElementById('membersTableBody').innerHTML = '';
-  document.getElementById('adminClassesGrid').innerHTML = '';
-  document.getElementById('adminPromoGrid').innerHTML = '';
-  document.getElementById('adminsTableBody').innerHTML = '';
   applyStoreConfigUI();
 });
 
@@ -837,8 +885,7 @@ function doRegister() {
   let role = "Customer";
   if(adminCode === "9999") {
     if(!STATE.adminCodeUsed) {
-      role = "Main Admin";
-      STATE.adminCodeUsed = true;
+      role = "Main Admin"; STATE.adminCodeUsed = true;
       toast("คุณคือแอดมินหลักคนแรกของระบบ", "success");
     } else {
       toast("รหัสถูกใช้งานแล้ว ลงทะเบียนเป็นลูกค้า", "error");
@@ -846,9 +893,10 @@ function doRegister() {
   }
 
   const newUser = { id: Date.now(), name, email, phone, pass, role, points: STATE.settings.autoPoints, level: STATE.settings.levels[0] };
-  STATE.users.push(newUser);
-  currentUser = newUser;
+  STATE.users.push(newUser); currentUser = newUser;
   if(role === "Customer") toast(`สมัครสำเร็จ รับ ${STATE.settings.autoPoints} คะแนนฟรี`, 'success');
+  
+  saveState();
   enterApp();
 }
 
@@ -856,12 +904,17 @@ function doLogin() {
   const email = document.getElementById('loginEmail').value;
   const pass = document.getElementById('loginPass').value;
   const user = STATE.users.find(u => (u.email === email || u.phone === email) && u.pass === pass);
-  if(user) { currentUser = user; toast("เข้าสู่ระบบสำเร็จ", "success"); enterApp(); }
-  else { toast("ข้อมูลไม่ถูกต้อง", "error"); }
+  if(user) { 
+      currentUser = user; 
+      saveState();
+      toast("เข้าสู่ระบบสำเร็จ", "success"); 
+      enterApp(); 
+  } else { toast("ข้อมูลไม่ถูกต้อง", "error"); }
 }
 
 function doLogout() {
   currentUser = null; isViewingAsCustomer = false;
+  saveState();
   document.getElementById('appShell').classList.add('hidden');
   document.getElementById('loginPage').classList.remove('hidden');
 }
@@ -888,7 +941,6 @@ function enterApp() {
   const isMainAdmin = currentUser.role === "Main Admin";
 
   document.querySelectorAll('.main-admin-only').forEach(el => el.classList.toggle('hidden', !isMainAdmin));
-
   if(isAdmin) document.getElementById('btnSwitchView').classList.remove('hidden');
   else document.getElementById('btnSwitchView').classList.add('hidden');
 
@@ -912,8 +964,7 @@ function applyViewMode() {
         document.getElementById('btnSwitchView').innerText = "👀 ดูมุมมองลูกค้า";
         document.getElementById('btnSwitchView').classList.replace('btn-orange', 'btn-primary');
         document.getElementById('userPointsBadge').classList.add('hidden');
-        showPage('adminDash');
-        renderAdminTables();
+        showPage('adminDash'); renderAdminTables();
     } else {
         if(currentUser.role.includes("Admin")) {
             document.getElementById('btnSwitchView').innerText = "🔙 กลับมุมมองแอดมิน";
@@ -926,15 +977,12 @@ function applyViewMode() {
         document.getElementById('profileAvatar').textContent = currentUser.name.charAt(0);
         document.getElementById('profileName').textContent = currentUser.name;
         document.getElementById('profileEmailPhone').textContent = `${currentUser.email} | ${currentUser.phone}`;
-        
         document.getElementById('profEditName').value = currentUser.name;
         document.getElementById('profEditEmail').value = currentUser.email;
         document.getElementById('profEditPhone').value = currentUser.phone;
         
-        renderCustomerBookingCalendar();
-        renderClassTypes();
-        renderCustomerPackages();
-        renderCustomerRewards();
+        renderCustomerBookingCalendar(); renderClassTypes(); renderCustomerPackages(); renderCustomerRewards();
+        renderCustomerHistory();
         showPage('dashboard');
     }
 }
@@ -954,39 +1002,34 @@ function showPage(page) {
   if(page === 'adminBookings') renderAdminBookingCalendar();
 }
 
-// ข้อ 4: อัปเดตข้อมูลบนบัตรสมาชิก และ Badge
 function updatePointsBadge() {
   document.getElementById('userPointsBadge').textContent = `🌟 ${currentUser.points} แต้ม`;
   document.getElementById('dashPoints').textContent = currentUser.points;
   document.getElementById('dashLevel').textContent = currentUser.level;
   
-  // อัปเดตบัตร
   document.getElementById('memCardLevel').textContent = currentUser.level;
   document.getElementById('memCardName').textContent = currentUser.name;
   document.getElementById('memCardId').textContent = "000" + currentUser.id.toString().slice(-4);
   document.getElementById('memCardPoints').textContent = currentUser.points;
-  
-  const cardBg = document.getElementById('memCardBg');
-  cardBg.className = `membership-card card-level-${currentUser.level}`;
+  document.getElementById('memCardBg').className = `membership-card card-level-${currentUser.level}`;
 
-  if(document.getElementById('crmUserPoints')) {
-      document.getElementById('crmUserPoints').textContent = currentUser.points;
-  }
+  if(document.getElementById('crmUserPoints')) document.getElementById('crmUserPoints').textContent = currentUser.points;
+  saveState();
 }
 
-// ฟังก์ชันเดิมแต่ซ่อนปุ่มไปแล้วใน HTML
+// Hidden feature intact
 function simulateQRScan() {
   const pts = 20; currentUser.points += pts;
   updatePointsBadge(); toast(`🎉 ได้รับ ${pts} คะแนนจากการสแกน!`, 'success');
 }
 
 // =========================================================
-// CUSTOMER BOOKING
+// CUSTOMER BOOKING & PURCHASING
 // =========================================================
 function renderClassTypes() {
     const container = document.getElementById('classTypeSelector');
     container.innerHTML = STATE.classes.map(c => `
-        <button class="class-type-btn" onclick="selectClassType(this, ${c.id}, '${c.name}', ${c.price}, '${c.slots}')">
+        <button class="class-type-btn" onclick="selectClassType(this, ${c.id})">
             <span class="type-icon">🏋️</span>
             <span class="type-name">${c.name}</span>
             <span class="type-price">฿${c.price}/ครั้ง</span>
@@ -994,12 +1037,12 @@ function renderClassTypes() {
     `).join('');
 }
 
-function selectClassType(btn, id, name, price, slots) {
+function selectClassType(btn, id) {
     document.querySelectorAll('.class-type-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
-    selectedClass = { id, name, price, slots };
+    selectedClass = STATE.classes.find(x => x.id === id);
     updateBookingSummary();
-    renderTimeSlots(); // เรนเดอร์เวลาของคลาสนี้ใหม่
+    renderTimeSlots(); 
 }
 
 function renderCustomerBookingCalendar() {
@@ -1013,8 +1056,7 @@ function renderCustomerBookingCalendar() {
 
   for(let i = 0; i < firstDay; i++) { grid.appendChild(document.createElement('div')); }
   for(let d = 1; d <= daysInMonth; d++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day'; el.textContent = d;
+    const el = document.createElement('div'); el.className = 'cal-day'; el.textContent = d;
     const dateStr = `${calYear}-${(calMonth+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
     
     if(selectedDates.includes(dateStr)) el.classList.add('selected');
@@ -1048,7 +1090,7 @@ function renderTimeSlots() {
     container.style.display='block';
     grid.innerHTML = '';
     
-    // ดึง slot เวลามาจากคลาสที่สร้างไว้โดยแอดมิน (แยกด้วยคอมม่าถ้ามีหลายอัน)
+    // ข้อ 3: รองรับหลายช่วงเวลา
     const availableTimes = selectedClass.slots.split(',').map(s => s.trim());
     
     availableTimes.forEach(t => {
@@ -1079,42 +1121,99 @@ function updateBookingSummary() {
     document.getElementById('pricePerClass').textContent = `฿${price}`;
     document.getElementById('priceCount').textContent = `x ${totalCount}`;
     document.getElementById('priceTotal').textContent = `฿${total}`;
-
-    document.getElementById('pay-class').textContent = selectedClass ? selectedClass.name : '-';
-    document.getElementById('pay-count').textContent = totalCount + " ครั้ง";
-    document.getElementById('pay-total').textContent = `฿${total}`;
 }
 
 function clearBooking() {
     selectedDates = []; selectedTimes = []; selectedClass = null;
     document.querySelectorAll('.class-type-btn').forEach(b => b.classList.remove('selected'));
-    renderCustomerBookingCalendar();
-    document.getElementById('timeSlots').style.display = 'none';
+    renderCustomerBookingCalendar(); document.getElementById('timeSlots').style.display = 'none';
     updateBookingSummary();
 }
 
+function preparePayment(type, pkgId = null) {
+    if(type === 'class') {
+        if(!selectedClass || selectedDates.length === 0 || selectedTimes.length === 0) return toast('กรุณาเลือกคลาส วัน และเวลาก่อน', 'error');
+        const totalCount = selectedDates.length * selectedTimes.length;
+        const total = selectedClass.price * totalCount;
+        currentPaymentContext = { type: 'class', item: selectedClass, totalCount, total };
+        document.getElementById('pay-class').textContent = selectedClass.name;
+        document.getElementById('pay-count').textContent = totalCount + " ครั้ง";
+        document.getElementById('pay-total').textContent = `฿${total}`;
+    } else if(type === 'package') {
+        const pkg = STATE.packages.find(p => p.id === pkgId);
+        currentPaymentContext = { type: 'package', item: pkg, totalCount: 1, total: pkg.price };
+        document.getElementById('pay-class').textContent = "แพ็กเกจ: " + pkg.name;
+        document.getElementById('pay-count').textContent = "1 รายการ";
+        document.getElementById('pay-total').textContent = `฿${pkg.price}`;
+    }
+    showPage('payment');
+}
+
+// ข้อ 5: เมื่อลูกค้ายืนยันชำระเงิน ระบบจะเซฟลง STATE.bookings
 function confirmPayment() {
-    if(!selectedClass || selectedDates.length === 0 || selectedTimes.length === 0) return toast('กรุณาเลือกคลาส วัน และเวลาก่อน', 'error');
+    if(!currentPaymentContext) return toast('เกิดข้อผิดพลาดในการดึงข้อมูลชำระเงิน', 'error');
     
-    const price = selectedClass.price * (selectedDates.length * selectedTimes.length);
-    selectedDates.forEach(date => {
-        selectedTimes.forEach(time => {
-            STATE.bookings.push({
-                id: Date.now() + Math.floor(Math.random()*100),
-                userId: currentUser.id, userName: currentUser.name,
-                className: selectedClass.name, date: date, time: time, price: selectedClass.price, status: "รอตรวจสอบ"
+    if(currentPaymentContext.type === 'class') {
+        selectedDates.forEach(date => {
+            selectedTimes.forEach(time => {
+                STATE.bookings.push({
+                    id: Date.now() + Math.floor(Math.random()*100),
+                    userId: currentUser.id, userName: currentUser.name,
+                    className: currentPaymentContext.item.name, date: date, time: time, 
+                    price: currentPaymentContext.item.price, status: "รอตรวจสอบ"
+                });
             });
         });
-    });
+    } else if (currentPaymentContext.type === 'package') {
+        const today = new Date();
+        const dateStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')}`;
+        STATE.bookings.push({
+             id: Date.now() + Math.floor(Math.random()*100),
+             userId: currentUser.id, userName: currentUser.name,
+             className: "ซื้อแพ็กเกจ: " + currentPaymentContext.item.name, date: dateStr, time: "-", 
+             price: currentPaymentContext.item.price, status: "รอตรวจสอบ"
+        });
+    }
 
-    const earnedPoints = Math.floor(price / STATE.settings.bahtRatio);
+    const earnedPoints = Math.floor(currentPaymentContext.total / STATE.settings.bahtRatio);
     currentUser.points += earnedPoints;
 
     toast('ส่งสลิปเรียบร้อย! รอแอดมินตรวจสอบ', 'success');
-    clearBooking(); updatePointsBadge(); showPage('dashboard');
+    clearBooking(); updatePointsBadge(); saveState(); renderCustomerHistory(); showPage('dashboard');
 }
 
-// ข้อ 3: ระบบ CRM ลูกค้า
+function renderCustomerHistory() {
+    const list = document.getElementById('myHistoryList');
+    const upList = document.getElementById('upcomingList');
+    
+    const myBookings = STATE.bookings.filter(b => b.userId === currentUser.id).reverse();
+    if(myBookings.length === 0) {
+        list.innerHTML = '<p>ยังไม่มีประวัติ</p>';
+        upList.innerHTML = '<p style="font-size:12px; color:var(--gray-400)">ยังไม่มีการจอง</p>';
+        return;
+    }
+    
+    list.innerHTML = myBookings.map(b => `
+        <div class="history-item">
+            <div class="history-dot ${b.className.includes('แพ็กเกจ') ? 'orange' : 'blue'}">${b.className.includes('แพ็กเกจ') ? '📦' : '📅'}</div>
+            <div class="history-info"><h4>${b.className}</h4><p>วันที่: ${b.date} ${b.time!=-'-'? 'เวลา: '+b.time : ''}</p></div>
+            <span class="badge ${b.status === 'รอตรวจสอบ' ? 'badge-orange' : 'badge-green'}">${b.status}</span>
+        </div>
+    `).join('');
+
+    // สำหรับ Upcoming ใน Dashboard (แสดงแค่ 3 รายการล่าสุดที่เป็นคลาส)
+    const upcoming = myBookings.filter(b => !b.className.includes('แพ็กเกจ')).slice(0,3);
+    upList.innerHTML = upcoming.length > 0 ? upcoming.map(b => `
+        <div class="history-item">
+            <div class="history-dot blue">📅</div>
+            <div class="history-info"><h4>${b.className}</h4><p>${b.date} · ${b.time}</p></div>
+        </div>
+    `).join('') : '<p style="font-size:12px; color:var(--gray-400)">ยังไม่มีการจอง</p>';
+
+    document.getElementById('dashBookings').textContent = myBookings.length;
+}
+
+
 function renderCustomerRewards() {
     const grid = document.getElementById('crmRewardsGrid');
     grid.innerHTML = STATE.rewards.map(r => `
@@ -1127,6 +1226,7 @@ function renderCustomerRewards() {
     `).join('');
 }
 
+// ข้อ 6: ขึ้น Popup ขอแสดงความยินดี
 function redeemReward(id) {
     const reward = STATE.rewards.find(r => r.id === id);
     if(reward.stock <= 0) return toast('ของรางวัลหมดแล้ว', 'error');
@@ -1136,9 +1236,22 @@ function redeemReward(id) {
     reward.stock -= 1;
     updatePointsBadge();
     renderCustomerRewards();
-    toast(`แลกรับ ${reward.name} สำเร็จ! กรุณาติดต่อแอดมินเพื่อรับของ`, 'success');
+    saveState();
+
+    // แสดง Popup 
+    document.getElementById('modalTitle').textContent = '🎉 ขอแสดงความยินดี!';
+    document.getElementById('modalBody').innerHTML = `
+        <div style="text-align:center; padding:20px 0;">
+            <div style="font-size:40px; margin-bottom:10px;">${reward.icon}</div>
+            <p style="font-weight:bold; font-size:16px; margin-bottom:10px;">คุณได้แลกรับ: ${reward.name}</p>
+            <p style="color:var(--danger); font-size:13px; font-weight:600;">กรุณาแคปหน้าจอแล้วติดต่อแอดมินเพื่อยืนยันรับของ</p>
+        </div>
+        <button class="btn btn-primary w-100" style="justify-content:center" onclick="closeModal()">ตกลง</button>
+    `;
+    document.getElementById('modalOverlay').classList.remove('hidden');
 }
 
+// ข้อ 5: ซื้อแพ็กเกจได้จริง
 function renderCustomerPackages() {
     const grid = document.getElementById('packagesGrid');
     grid.innerHTML = STATE.packages.map(p => `
@@ -1146,7 +1259,7 @@ function renderCustomerPackages() {
             <div class="pkg-name">${p.name}</div>
             <div class="pkg-price">฿${p.price}</div>
             <div class="pkg-features"><div class="pkg-feature">${p.note || 'ไม่มีหมายเหตุ'}</div></div>
-            <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="toast('กดสั่งซื้อแล้ว กรุณาโอนเงิน','info'); showPage('payment')">เลือกแพ็กเกจ</button>
+            <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="preparePayment('package', ${p.id})">เลือกซื้อแพ็กเกจ</button>
         </div>
     `).join('');
 }
@@ -1156,15 +1269,13 @@ function saveProfile() {
   currentUser.email = document.getElementById('profEditEmail').value;
   const p = document.getElementById('profEditPass').value;
   if(p) currentUser.pass = p;
-  toast('บันทึกโปรไฟล์เรียบร้อย', 'success'); applyViewMode();
+  toast('บันทึกโปรไฟล์เรียบร้อย', 'success'); saveState(); applyViewMode();
 }
-
 
 // =========================================================
 // ADMIN FUNCTIONS & TABLES 
 // =========================================================
 function renderAdminTables() {
-  // ข้อ 7: ข้อมูลสมาชิก (นับแอดมินด้วย -> เอา filter role ออก)
   const memHtml = STATE.users.map(u => `
     <tr>
       <td>#${u.id.toString().slice(-4)}</td>
@@ -1172,15 +1283,15 @@ function renderAdminTables() {
       <td><div style="font-size:12px">${u.email}</div><div style="font-size:11px;color:gray">${u.phone}</div></td>
       <td><span class="badge ${u.role.includes('Admin') ? 'badge-blue' : 'badge-orange'}">${u.role.includes('Admin') ? u.role : u.level}</span></td>
       <td><strong style="color:var(--blue)">${u.points}</strong></td>
-      <td><button class="btn btn-outline btn-sm" onclick="openEditMember(${u.id})">แก้ไข</button></td>
+      <td><button class="btn btn-outline btn-sm" onclick="openEditMember(${u.id})">จัดการสิทธิ์/คะแนน</button></td>
     </tr>
   `).join('');
   document.getElementById('membersTableBody').innerHTML = memHtml || '<tr><td colspan="6" style="text-align:center">ยังไม่มีข้อมูล</td></tr>';
 
-  // ข้อ 5: จัดการคลาส
+  // ข้อ 2, 3: แสดงระยะเวลาสอน (duration) และคลาส
   const clsHtml = STATE.classes.map(c => `
     <div class="class-row">
-      <div class="class-info"><h4>${c.name}</h4><p>เทรนเนอร์: ${c.trainer} | เวลาลงปฏิทิน: ${c.slots}</p></div>
+      <div class="class-info"><h4>${c.name}</h4><p>เทรนเนอร์: ${c.trainer} | เวลา: ${c.slots} (${c.duration || '-'})</p></div>
       <div style="margin-right:15px; font-weight:bold;">฿${c.price}</div>
       <div class="class-controls">
          <button class="btn btn-outline btn-sm" onclick="openClassModal(${c.id})">แก้ไข</button>
@@ -1190,7 +1301,6 @@ function renderAdminTables() {
   `).join('');
   document.getElementById('adminClassesGrid').innerHTML = clsHtml || '<p>ยังไม่มีบริการ/คลาส</p>';
 
-  // ข้อ 2: จัดการแพ็กเกจและหมายเหตุ
   const pkgHtml = STATE.packages.map(p => `
      <tr>
         <td style="font-weight:bold">${p.name}</td>
@@ -1204,16 +1314,13 @@ function renderAdminTables() {
   `).join('');
   document.getElementById('adminPackagesTableBody').innerHTML = pkgHtml || '<tr><td colspan="4" style="text-align:center">ยังไม่มีแพ็กเกจ</td></tr>';
 
-  // ข้อ 3: จัดการของรางวัล (CRM)
   const rwdHtml = STATE.rewards.map(r => `
      <tr>
         <td style="font-size:24px;">${r.icon}</td>
         <td style="font-weight:bold">${r.name}</td>
         <td>${r.points} แต้ม</td>
         <td>${r.stock} ชิ้น</td>
-        <td>
-           <button class="btn btn-danger btn-sm" onclick="deleteReward(${r.id})">ลบ</button>
-        </td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteReward(${r.id})">ลบ</button></td>
      </tr>
   `).join('');
   document.getElementById('adminRewardsTableBody').innerHTML = rwdHtml || '<tr><td colspan="5" style="text-align:center">ยังไม่มีของรางวัล</td></tr>';
@@ -1233,11 +1340,14 @@ function renderAdminTables() {
   document.getElementById('adminPromoGrid').innerHTML = proHtml || '<p>ยังไม่มีโปรโมชั่น</p>';
 
   const admHtml = STATE.users.filter(u => u.role.includes("Admin")).map(u => `
-    <tr><td>${u.name}</td><td>${u.email}</td><td><span class="badge badge-blue">${u.role}</span></td><td>-</td></tr>
+    <tr>
+        <td>${u.name}</td><td>${u.email}</td>
+        <td><span class="badge badge-blue">${u.role}</span></td>
+        <td>${u.id !== currentUser.id ? `<button class="btn btn-danger btn-sm" onclick="deleteAdmin(${u.id})">ลบ</button>` : '-'}</td>
+    </tr>
   `).join('');
   document.getElementById('adminsTableBody').innerHTML = admHtml;
 
-  // ข้อ 7: นับรวมแอดมินด้วย
   document.getElementById('statUsers').textContent = STATE.users.length;
   document.getElementById('statBookings').textContent = STATE.bookings.length;
 }
@@ -1291,35 +1401,128 @@ function showAdminBookingDetails(dateStr, bookings) {
     list.innerHTML = bookings.map(b => `
         <div class="history-item">
             <div class="history-dot blue">👤</div>
-            <div class="history-info"><h4>${b.className} — เวลา ${b.time}</h4><p>ลูกค้า: ${b.userName}</p></div>
+            <div class="history-info"><h4>${b.className} ${b.time!=-'-'? '— เวลา '+b.time : ''}</h4><p>ลูกค้า: ${b.userName}</p></div>
             <span class="badge ${b.status === 'รอตรวจสอบ' ? 'badge-orange' : 'badge-green'}">${b.status}</span>
+            <button class="btn btn-success btn-sm" style="margin-left:auto;" onclick="confirmBookingStatus(${b.id})">✓</button>
         </div>
     `).join('');
 }
 
+function confirmBookingStatus(id) {
+    const b = STATE.bookings.find(x => x.id === id);
+    if(b) b.status = "ยืนยันแล้ว";
+    toast('ยืนยันรายการเรียบร้อย', 'success');
+    renderAdminTables();
+    saveState();
+    
+    // re-render the detail list to update status badge visually
+    const bookingsToday = STATE.bookings.filter(x => x.date === b.date);
+    showAdminBookingDetails(b.date, bookingsToday);
+}
 
+
+// ข้อ 1 & 2: ให้คะแนนจากยอดเงิน
+window.calcAutoPoints = function(baht) {
+    const ratio = STATE.settings.bahtRatio;
+    const pts = Math.floor(parseInt(baht || 0) / ratio);
+    document.getElementById('calcPtsDisplay').textContent = pts;
+}
+
+// ข้อ 1, 2, 4: จัดการสิทธิ์แอดมิน, ปุ่มเพิ่มลดคะแนน และหมายเหตุ
 function openEditMember(id) {
   const u = STATE.users.find(x => x.id === id);
   const lvlOptions = STATE.settings.levels.map(l => `<option ${u.level === l ? 'selected' : ''}>${l}</option>`).join('');
-  document.getElementById('modalTitle').textContent = `จัดการผู้ใช้: ${u.name}`;
-  document.getElementById('modalBody').innerHTML = `
+  
+  let html = `
     <div class="form-group"><label class="form-label">ระดับสมาชิก</label><select class="form-input" id="editLvl">${lvlOptions}</select></div>
-    <div class="form-group"><label class="form-label">แต้มปัจจุบัน: ${u.points} | เพิ่ม/ลด</label><input type="number" class="form-input" id="editPts" value="0"></div>
-    <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="saveMember(${id})">บันทึกข้อมูล</button>
+    
+    <div class="section-divider"></div>
+    <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">เพิ่ม / ลด คะแนน (ข้อ 1)</h4>
+    <p style="font-size:12px;color:gray;">แต้มปัจจุบัน: <strong style="color:var(--orange)">${u.points}</strong></p>
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <select class="form-input" id="ptsAction" style="width:100px;"><option value="add">เพิ่ม</option><option value="deduct">ลด</option></select>
+        <input type="number" class="form-input" id="ptsAmount" placeholder="ใส่ตัวเลข" value="0">
+    </div>
+    <input type="text" class="form-input" id="ptsNote" placeholder="หมายเหตุ (เช่น แลกของ, ชดเชย)" style="margin-bottom:10px;">
+    <button class="btn btn-outline w-100" style="justify-content:center" onclick="updatePointsManual(${id})">อัปเดตคะแนน</button>
+
+    <h4 style="font-size:14px;font-weight:700;margin-top:20px;margin-bottom:10px;">เพิ่มคะแนนจากยอดชำระ (ข้อ 2)</h4>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <input type="number" class="form-input" id="payAmount" placeholder="ยอดเงิน (บาท)" onkeyup="calcAutoPoints(this.value)">
+        <span>= <strong id="calcPtsDisplay" style="color:var(--orange)">0</strong> แต้ม</span>
+    </div>
+    <button class="btn btn-outline w-100" style="margin-top:10px; justify-content:center;" onclick="addPointsFromPay(${id})">อัปเดตคะแนนจากยอดเงิน</button>
   `;
+
+  // ข้อ 4: แต่งตั้งแอดมินจากรายชื่อ
+  if(currentUser.role === 'Main Admin' && u.id !== currentUser.id) {
+      html += `
+      <div class="section-divider"></div>
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--danger)">แต่งตั้งสิทธิ์การใช้งาน (ข้อ 4)</h4>
+      <select class="form-input" id="roleChange" style="margin-bottom:10px;">
+          <option value="Customer" ${u.role=='Customer'?'selected':''}>ลูกค้าปกติ (Customer)</option>
+          <option value="Sub Admin" ${u.role=='Sub Admin'?'selected':''}>แอดมินรอง (Sub Admin)</option>
+          <option value="Main Admin" ${u.role=='Main Admin'?'selected':''}>แอดมินหลัก (Main Admin)</option>
+      </select>
+      <button class="btn btn-danger w-100" style="justify-content:center;" onclick="changeUserRole(${id})">อัปเดตสิทธิ์แอดมิน</button>
+      `;
+  }
+
+  // เซฟระดับสมาชิกทั่วไปด้วย
+  html += `<button class="btn btn-primary w-100" style="margin-top:20px; justify-content:center;" onclick="saveMemberLvl(${id})">บันทึกระดับสมาชิก</button>`;
+
+  document.getElementById('modalTitle').textContent = `จัดการลูกค้า: ${u.name}`;
+  document.getElementById('modalBody').innerHTML = html;
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 
-function saveMember(id) {
-  const u = STATE.users.find(x => x.id === id);
-  u.level = document.getElementById('editLvl').value;
-  u.points += parseInt(document.getElementById('editPts').value || 0);
-  renderAdminTables(); toast('อัปเดตข้อมูลลูกค้าเรียบร้อย', 'success'); closeModal();
+function updatePointsManual(id) {
+    const u = STATE.users.find(x => x.id === id);
+    const action = document.getElementById('ptsAction').value;
+    let amt = parseInt(document.getElementById('ptsAmount').value || 0);
+    const note = document.getElementById('ptsNote').value;
+    
+    if(amt === 0) return toast('กรุณาใส่ตัวเลขคะแนน', 'error');
+    if(action === 'deduct') amt = -amt;
+    
+    u.points += amt;
+    toast(`ดำเนินการ ${amt>0?'เพิ่ม':'ลด'} ${Math.abs(amt)} แต้มเรียบร้อย (หมายเหตุ: ${note||'-'})`, 'success');
+    
+    // Refresh modal UI to show new points
+    openEditMember(id);
+    renderAdminTables(); saveState();
 }
 
-// ข้อ 5: แอดมินแก้ไข เพิ่ม ลบ บริการ (คลาส) ได้
+function addPointsFromPay(id) {
+    const u = STATE.users.find(x => x.id === id);
+    const baht = parseInt(document.getElementById('payAmount').value || 0);
+    if(baht <= 0) return toast('กรุณาใส่ยอดชำระที่ถูกต้อง', 'error');
+    
+    const pts = Math.floor(baht / STATE.settings.bahtRatio);
+    u.points += pts;
+    toast(`ยอดชำระ ${baht} บาท ได้รับเพิ่ม ${pts} แต้ม`, 'success');
+    
+    openEditMember(id);
+    renderAdminTables(); saveState();
+}
+
+function changeUserRole(id) {
+    const u = STATE.users.find(x => x.id === id);
+    const newRole = document.getElementById('roleChange').value;
+    u.role = newRole;
+    toast(`เปลี่ยนสิทธิ์ ${u.name} เป็น ${newRole} เรียบร้อย`, 'success');
+    renderAdminTables(); saveState(); closeModal();
+}
+
+function saveMemberLvl(id) {
+  const u = STATE.users.find(x => x.id === id);
+  u.level = document.getElementById('editLvl').value;
+  renderAdminTables(); saveState(); toast('บันทึกระดับสมาชิกเรียบร้อย', 'success'); closeModal();
+}
+
+// ข้อ 3: เพิ่มระยะเวลาสอน
 function openClassModal(editId = null) {
-  let c = { name: '', trainer: '', slots: '', price: 0 };
+  let c = { name: '', trainer: '', slots: '', duration: '', price: 0 };
   if(editId) c = STATE.classes.find(x => x.id === editId);
   
   document.getElementById('modalTitle').textContent = editId ? `แก้ไขบริการ` : `เพิ่มบริการใหม่`;
@@ -1327,7 +1530,10 @@ function openClassModal(editId = null) {
     <input type="hidden" id="clsId" value="${editId || ''}">
     <div class="form-group"><label class="form-label">ชื่อบริการ/คลาส</label><input class="form-input" id="clsName" value="${c.name}"></div>
     <div class="form-group"><label class="form-label">เทรนเนอร์</label><input class="form-input" id="clsTrainer" value="${c.trainer}"></div>
-    <div class="form-group"><label class="form-label">ช่วงเวลาสอน (เวลาการสอนเพื่อลงปฏิทิน เช่น 09:00, 14:00)</label><input class="form-input" id="clsSlots" value="${c.slots}"></div>
+    <div class="info-grid">
+        <div class="form-group"><label class="form-label">เวลาลงปฏิทิน (คั่นด้วย ,)</label><input class="form-input" id="clsSlots" value="${c.slots}" placeholder="เช่น 09:00, 14:00"></div>
+        <div class="form-group"><label class="form-label">ระยะเวลาสอน (ข้อ 2)</label><input class="form-input" id="clsDuration" value="${c.duration||''}" placeholder="เช่น 60 นาที"></div>
+    </div>
     <div class="form-group"><label class="form-label">ราคา</label><input type="number" class="form-input" id="clsPrice" value="${c.price}"></div>
     <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="saveClass()">บันทึก</button>
   `;
@@ -1339,27 +1545,27 @@ function saveClass() {
   const name = document.getElementById('clsName').value;
   const trainer = document.getElementById('clsTrainer').value;
   const slots = document.getElementById('clsSlots').value;
+  const duration = document.getElementById('clsDuration').value;
   const price = parseInt(document.getElementById('clsPrice').value || 0);
 
   if(idStr) {
       const c = STATE.classes.find(x => x.id === parseInt(idStr));
-      c.name = name; c.trainer = trainer; c.slots = slots; c.price = price;
+      c.name = name; c.trainer = trainer; c.slots = slots; c.duration = duration; c.price = price;
       toast('แก้ไขคลาสสำเร็จ', 'success');
   } else {
-      STATE.classes.push({ id: Date.now(), name, trainer, slots, price });
+      STATE.classes.push({ id: Date.now(), name, trainer, slots, duration, price });
       toast('เพิ่มคลาสสำเร็จ', 'success');
   }
-  renderAdminTables(); closeModal();
+  renderAdminTables(); saveState(); closeModal();
 }
 
 function deleteClass(id) {
     if(confirm('ต้องการลบบริการนี้หรือไม่?')) {
         STATE.classes = STATE.classes.filter(x => x.id !== id);
-        renderAdminTables(); toast('ลบสำเร็จ', 'error');
+        renderAdminTables(); saveState(); toast('ลบสำเร็จ', 'error');
     }
 }
 
-// ข้อ 2: จัดการแพ็กเกจและหมายเหตุ
 function openPackageModal(editId = null) {
   let p = { name: '', price: 0, note: '' };
   if(editId) p = STATE.packages.find(x => x.id === editId);
@@ -1389,17 +1595,16 @@ function savePackage() {
       STATE.packages.push({ id: Date.now(), name, price, note });
       toast('เพิ่มแพ็กเกจสำเร็จ', 'success');
   }
-  renderAdminTables(); closeModal();
+  renderAdminTables(); saveState(); closeModal();
 }
 
 function deletePackage(id) {
     if(confirm('ต้องการลบแพ็กเกจนี้หรือไม่?')) {
         STATE.packages = STATE.packages.filter(x => x.id !== id);
-        renderAdminTables(); toast('ลบสำเร็จ', 'error');
+        renderAdminTables(); saveState(); toast('ลบสำเร็จ', 'error');
     }
 }
 
-// ข้อ 3: จัดการของรางวัล CRM
 function openRewardModal() {
   document.getElementById('modalTitle').textContent = `เพิ่มของรางวัล`;
   document.getElementById('modalBody').innerHTML = `
@@ -1418,19 +1623,16 @@ function openRewardModal() {
 
 function saveReward() {
   STATE.rewards.push({
-    id: Date.now(),
-    name: document.getElementById('rwdName').value,
-    icon: document.getElementById('rwdIcon').value || '🎁',
-    points: parseInt(document.getElementById('rwdPts').value || 0),
-    stock: parseInt(document.getElementById('rwdStock').value || 0)
+    id: Date.now(), name: document.getElementById('rwdName').value, icon: document.getElementById('rwdIcon').value || '🎁',
+    points: parseInt(document.getElementById('rwdPts').value || 0), stock: parseInt(document.getElementById('rwdStock').value || 0)
   });
-  renderAdminTables(); toast('เพิ่มของรางวัลสำเร็จ', 'success'); closeModal();
+  renderAdminTables(); saveState(); toast('เพิ่มของรางวัลสำเร็จ', 'success'); closeModal();
 }
 
 function deleteReward(id) {
     if(confirm('ต้องการลบของรางวัลนี้หรือไม่?')) {
         STATE.rewards = STATE.rewards.filter(x => x.id !== id);
-        renderAdminTables(); toast('ลบสำเร็จ', 'error');
+        renderAdminTables(); saveState(); toast('ลบสำเร็จ', 'error');
     }
 }
 
@@ -1463,14 +1665,44 @@ function openPromoModal() {
 function savePromo() {
   STATE.promotions.push({
     id: Date.now(), name: document.getElementById('proName').value, exp: document.getElementById('proExp').value,
-    pointsReq: parseInt(document.getElementById('proPts').value || 0),
-    proTotalLimit: parseInt(document.getElementById('proTotalLimit').value || 0),
-    proPerTxDay: parseInt(document.getElementById('proPerTxDay').value || 0),
-    proPerPersonDay: parseInt(document.getElementById('proPerPersonDay').value || 0),
-    proPerPersonTx: parseInt(document.getElementById('proPerPersonTx').value || 0),
-    show: document.getElementById('proShow').value === "true"
+    pointsReq: parseInt(document.getElementById('proPts').value || 0), proTotalLimit: parseInt(document.getElementById('proTotalLimit').value || 0),
+    proPerTxDay: parseInt(document.getElementById('proPerTxDay').value || 0), proPerPersonDay: parseInt(document.getElementById('proPerPersonDay').value || 0),
+    proPerPersonTx: parseInt(document.getElementById('proPerPersonTx').value || 0), show: document.getElementById('proShow').value === "true"
   });
-  renderAdminTables(); toast('สร้างโปรโมชั่นสำเร็จ', 'success'); closeModal();
+  renderAdminTables(); saveState(); toast('สร้างโปรโมชั่นสำเร็จ', 'success'); closeModal();
+}
+
+// ข้อ 3: แอดมินหลัก เพิ่มลดแอดมิน
+function openAddAdminModal() {
+  document.getElementById('modalTitle').textContent = `เพิ่มแอดมิน`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label class="form-label">ชื่อ-นามสกุล</label><input class="form-input" id="admName"></div>
+    <div class="form-group"><label class="form-label">อีเมล</label><input class="form-input" id="admEmail"></div>
+    <div class="form-group"><label class="form-label">รหัสผ่าน</label><input type="password" class="form-input" id="admPass"></div>
+    <div class="form-group"><label class="form-label">สิทธิ์แอดมิน</label>
+        <select class="form-input" id="admRole"><option value="Sub Admin">แอดมินรอง (Sub Admin)</option><option value="Main Admin">แอดมินหลัก (Main Admin)</option></select>
+    </div>
+    <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="saveNewAdmin()">บันทึกแอดมิน</button>
+  `;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function saveNewAdmin() {
+  const name = document.getElementById('admName').value;
+  const email = document.getElementById('admEmail').value;
+  const pass = document.getElementById('admPass').value;
+  const role = document.getElementById('admRole').value;
+  if(!name || !email || !pass) return toast('กรุณากรอกข้อมูลให้ครบ', 'error');
+
+  STATE.users.push({ id: Date.now(), name, email, phone: '-', pass, role, points: 0, level: 'Admin' });
+  renderAdminTables(); saveState(); toast('เพิ่มแอดมินสำเร็จ', 'success'); closeModal();
+}
+
+function deleteAdmin(id) {
+    if(confirm('ต้องการลบแอดมินท่านนี้หรือไม่?')) {
+        STATE.users = STATE.users.filter(u => u.id !== id);
+        renderAdminTables(); saveState(); toast('ลบแอดมินสำเร็จ', 'error');
+    }
 }
 
 // =========================================================
@@ -1481,18 +1713,13 @@ function setSettingsTab(btn, targetId) {
   ['setSys', 'setNotif', 'setAdmins'].forEach(id => document.getElementById(id).classList.toggle('hidden', id !== targetId));
 }
 
-// ข้อ 6: บันทึกกฎการทับซ้อนเวลา
 function saveSystemSettings() {
   STATE.settings.allowSameOverlap = document.getElementById('cfgSameOverlap').checked;
   STATE.settings.allowDiffOverlap = document.getElementById('cfgDiffOverlap').checked;
   STATE.settings.autoPoints = parseInt(document.getElementById('cfgAutoPoints').value || 0);
   STATE.settings.bahtRatio = parseInt(document.getElementById('cfgBahtRatio').value || 10);
-  STATE.settings.levels = [
-    document.getElementById('cfgLvl1').value || "Basic",
-    document.getElementById('cfgLvl2').value || "Gold",
-    document.getElementById('cfgLvl3').value || "Diamond"
-  ];
-  toast('บันทึกตั้งค่าระบบเรียบร้อย', 'success');
+  STATE.settings.levels = [ document.getElementById('cfgLvl1').value || "Basic", document.getElementById('cfgLvl2').value || "Gold", document.getElementById('cfgLvl3').value || "Diamond" ];
+  saveState(); toast('บันทึกตั้งค่าระบบเรียบร้อย', 'success');
 }
 
 function saveStoreSettings() {
@@ -1500,14 +1727,14 @@ function saveStoreSettings() {
   STATE.settings.phone = document.getElementById('stPhone').value;
   STATE.settings.line = document.getElementById('stLine').value;
   STATE.settings.link = document.getElementById('stLink').value;
-  applyStoreConfigUI(); toast('บันทึกหน้าร้านเรียบร้อย', 'success');
+  applyStoreConfigUI(); saveState(); toast('บันทึกหน้าร้านเรียบร้อย', 'success');
 }
 
 function savePaySettings() {
   STATE.settings.payBankName = document.getElementById('payBankNameInp').value;
   STATE.settings.payAccName = document.getElementById('payAccNameInp').value;
   STATE.settings.payAccNo = document.getElementById('payAccNoInp').value;
-  applyStoreConfigUI(); toast('บันทึกการชำระเงินเรียบร้อย', 'success');
+  applyStoreConfigUI(); saveState(); toast('บันทึกการชำระเงินเรียบร้อย', 'success');
 }
 
 function handleLogoUpload(event) {
